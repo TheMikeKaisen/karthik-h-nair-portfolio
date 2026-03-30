@@ -1,6 +1,7 @@
 import { sanityFetch } from "@/sanity/lib/client";
 import { featuredProjectsQuery } from "@/sanity/lib/queries";
 import { Project } from "@/types";
+import { Hero } from "@/components/Hero";
 
 export default async function HomePage() {
   const projects = await sanityFetch<Project[]>({ query: featuredProjectsQuery });
@@ -8,20 +9,7 @@ export default async function HomePage() {
 
   return (
     <main className="min-h-screen p-4 md:p-8 relative">
-      {/* HERO SECTION */}
-      <section className="py-20 text-center">
-        <h1 className="text-6xl font-bold bg-gradient-to-r from-blue-400 to-emerald-400 bg-clip-text text-transparent">
-          Karthik Haji Nair
-        </h1>
-        <p className="mt-4 text-xl text-gray-400">
-          Backend Engineer & System Designer
-        </p>
-        <div className="mt-8 flex justify-center gap-4">
-          <span className="px-3 py-1 rounded-full border border-gray-700 bg-gray-800/50 text-sm">Next.js 16</span>
-          <span className="px-3 py-1 rounded-full border border-gray-700 bg-gray-800/50 text-sm">Node.js</span>
-          <span className="px-3 py-1 rounded-full border border-gray-700 bg-gray-800/50 text-sm">System Design</span>
-        </div>
-      </section>
+      <Hero />
 
       {/* MAJOR PROJECTS SECTION */}
       <section className="max-w-6xl mx-auto">
