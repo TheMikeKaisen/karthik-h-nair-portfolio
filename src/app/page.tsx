@@ -7,7 +7,7 @@ export default async function HomePage() {
   console.log(projects)
 
   return (
-    <main className="min-h-screen bg-[#0a0a0a] text-white p-8">
+    <main className="min-h-screen p-4 md:p-8 relative">
       {/* HERO SECTION */}
       <section className="py-20 text-center">
         <h1 className="text-6xl font-bold bg-gradient-to-r from-blue-400 to-emerald-400 bg-clip-text text-transparent">
