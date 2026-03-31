@@ -2,105 +2,123 @@
 
 import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MapPin, Activity, Server } from "lucide-react";
+import Image from "next/image";
+import { Terminal } from "lucide-react";
+import { usePathname } from "next/navigation";
 
-// The Packet Type for data flow animation
-type Packet = {
-  id: string;
-  startX: number;
-  startY: number;
-  endX: number;
-  endY: number;
-  duration: number; // seconds
-};
+const terminalLines = [
+  { text: "$ whoami", isCommand: true },
+  { text: "> Karthik H Nair", isCommand: false },
+  { text: "", isCommand: false },
+  { text: "$ role", isCommand: true },
+  { text: "> Interning as Associate Software Engineer at provus", isCommand: false },
+  { text: "", isCommand: false },
+  { text: "$ currently_building", isCommand: true },
+  { text: "> ", isCommand: false },
+];
+
+const rotatingTexts = [
+  "`Build in Public` System for my Portfolio",
+  "A system design visualizer",
+  "A Strong foundation in system design",
+  "CPQ products using Salesforce LWC"
+];
+
+function RotatingText({ texts }: { texts: string[] }) {
+  const [textIndex, setTextIndex] = useState(0);
+  const [charIndex, setCharIndex] = useState(0);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  useEffect(() => {
+    const currentText = texts[textIndex];
+    let timeout: NodeJS.Timeout;
+
+    if (isDeleting) {
+      if (charIndex > 0) {
+        timeout = setTimeout(() => setCharIndex(c => c - 1), 30); // Fast backspace
+      } else {
+        setIsDeleting(false);
+        setTextIndex(i => (i + 1) % texts.length);
+        timeout = setTimeout(() => {}, 200); // Pause before typing new word
+      }
+    } else {
+      if (charIndex < currentText.length) {
+        timeout = setTimeout(() => setCharIndex(c => c + 1), 50); // Normal typing speed
+      } else {
+        timeout = setTimeout(() => setIsDeleting(true), 3000); // Wait 3s reading time before backspacing
+      }
+    }
+
+    return () => clearTimeout(timeout);
+  }, [charIndex, isDeleting, textIndex, texts]);
+
+  return (
+    <>
+      {texts[textIndex].substring(0, charIndex)}
+      <motion.span
+        animate={{ opacity: [1, 0] }}
+        transition={{ duration: 0.8, repeat: Infinity }}
+        className="inline-block w-2 ml-1 h-[1.2em] bg-emerald-400 align-middle"
+      />
+    </>
+  );
+}
 
 export function Hero() {
   const [mousePos, setMousePos] = useState({ x: -1000, y: -1000 });
-  const [packets, setPackets] = useState<Packet[]>([]);
-  const [latency, setLatency] = useState(24);
+  const [renderKey, setRenderKey] = useState(0);
+  const [visibleChars, setVisibleChars] = useState(0);
   const GRID_SIZE = 50;
+  
+  const totalChars = terminalLines.reduce((acc, line) => acc + line.text.length, 0);
 
   // Track Mouse for Spotlight
   useEffect(() => {
-    // We bind to the window to track the mouse seamlessly
     const handleMouseMove = (e: MouseEvent) => {
       setMousePos({ x: e.clientX, y: e.clientY });
     };
 
-    // Disable on small screens per performance requirements
     if (window.innerWidth >= 768) {
       window.addEventListener("mousemove", handleMouseMove);
     }
-
     return () => window.removeEventListener("mousemove", handleMouseMove);
   }, []);
 
-  // Organic Latency Simulator
+  // Iron-clad hydration trigger for BfCache restorations mapped perfectly to the typewriter engine.
+  // We execute a native string-slice interval mapping against React state precisely rendering at ~50fps.
   useEffect(() => {
-    let timeoutId: NodeJS.Timeout;
-    const updateLatency = () => {
-      const newLatency = Math.floor(Math.random() * (35 - 22 + 1)) + 22;
-      setLatency(newLatency);
-      const nextUpdate = Math.floor(Math.random() * (3000 - 1500 + 1)) + 1500;
-      timeoutId = setTimeout(updateLatency, nextUpdate);
-    };
-    timeoutId = setTimeout(updateLatency, 2000);
-    return () => clearTimeout(timeoutId);
-  }, []);
+    setRenderKey(Date.now());
+    setVisibleChars(0);
+    
+    const initialDelay = setTimeout(() => {
+      const interval = setInterval(() => {
+        setVisibleChars((prev) => {
+          if (prev >= totalChars) {
+            clearInterval(interval);
+            return prev;
+          }
+          return prev + 1;
+        });
+      }, 20); // 143 keys * 20ms = ~2.8 seconds total rendering sequence
+      
+      return () => clearInterval(interval);
+    }, 1000);
+    
+    return () => clearTimeout(initialDelay);
+  }, [totalChars]);
 
-  // Packet Spawner (Data Flow)
-  useEffect(() => {
-    const spawnPacket = () => {
-      const isHorizontal = Math.random() > 0.5;
-      const length = (Math.floor(Math.random() * 8) + 4) * GRID_SIZE; // Travel distance between 200px and 600px
-
-      let startX, startY, endX, endY;
-
-      const width = document.documentElement.clientWidth;
-      const height = document.documentElement.clientHeight;
-
-      if (isHorizontal) {
-        // Snap to grid Y
-        startY = Math.floor((Math.random() * height) / GRID_SIZE) * GRID_SIZE;
-        endY = startY;
-        const goingRight = Math.random() > 0.5;
-        startX = goingRight ? -length : width + length;
-        endX = goingRight ? width + length : -length;
-      } else {
-        // Snap to grid X
-        startX = Math.floor((Math.random() * width) / GRID_SIZE) * GRID_SIZE;
-        endX = startX;
-        const goingDown = Math.random() > 0.5;
-        startY = goingDown ? -length : height + length;
-        endY = goingDown ? height + length : -length;
-      }
-
-      const newPacket: Packet = {
-        id: crypto.randomUUID(),
-        startX,
-        startY,
-        endX,
-        endY,
-        duration: 3.5, // Crisp, clean 3.5s traversal speed
-      };
-
-      setPackets(prev => [...prev, newPacket]);
-
-      // Scavenge packet once off-screen
-      setTimeout(() => {
-        setPackets(prev => prev.filter(p => p.id !== newPacket.id));
-      }, newPacket.duration * 1000);
-    };
-
-    // Standard interval is 3 seconds, meaning there is usually 1-2 packets visible.
-    const intervalId = setInterval(spawnPacket, 3000);
-    spawnPacket();
-    return () => clearInterval(intervalId);
-  }, []);
+  // Determine safely which lines should be physically rendered in the DOM right now
+  let lastVisibleLineIndex = 0;
+  for (let i = 0; i < terminalLines.length; i++) {
+    const prevCount = terminalLines.slice(0, i).reduce((sum, l) => sum + l.text.length, 0);
+    if (visibleChars >= prevCount) {
+      lastVisibleLineIndex = i;
+    }
+  }
 
   return (
-    <section className="relative min-h-[90vh] flex flex-col items-center justify-center overflow-hidden bg-[#0a0a0a]">
-      {/* 1. Base Grid Layer (Faint Structural Dark Lines) */}
+    <section className="relative min-h-[95vh] flex flex-col items-center justify-center overflow-hidden bg-[#0a0a0a] pt-16">
+      {/* 1. Base Grid Layer */}
       <div
         className="absolute inset-0 z-0 pointer-events-none"
         style={{
@@ -112,7 +130,7 @@ export function Hero() {
         }}
       />
 
-      {/* 2. Spotlight Masked Grid Layer (Glowing Intersections) */}
+      {/* 2. Spotlight Masked Grid Layer */}
       <div
         className="absolute inset-0 z-0 pointer-events-none hidden md:block"
         style={{
@@ -126,84 +144,98 @@ export function Hero() {
         }}
       />
 
-      {/* 3. Packet Flow Engine */}
-      <div className="absolute inset-0 z-0 pointer-events-none">
-        <AnimatePresence>
-          {packets.map((p) => {
-            const isHorizontal = p.startY === p.endY;
-            const goingRight = p.endX > p.startX;
-            const goingDown = p.endY > p.startY;
+      {/* Content Layout */}
+      <div key={renderKey} className="z-10 container flex flex-col items-center text-center px-4 w-full">
 
-            return (
-              <motion.div
-                key={p.id}
-                initial={{ x: p.startX, y: p.startY, opacity: 0 }}
-                animate={{ x: p.endX, y: p.endY, opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: p.duration, ease: "linear" }}
-                className="absolute shadow-[0_0_8px_1px_rgba(52,211,153,0.6)]"
-                style={{
-                  width: isHorizontal ? '30px' : '2px',
-                  height: isHorizontal ? '2px' : '30px',
-                  // Ghost tail effect transitioning to transparent
-                  background: isHorizontal
-                    ? `linear-gradient(${goingRight ? 'to left' : 'to right'}, #34d399 20%, transparent)`
-                    : `linear-gradient(${goingDown ? 'to top' : 'to bottom'}, #34d399 20%, transparent)`,
-                  marginLeft: isHorizontal ? (goingRight ? 0 : -30) : 0,
-                  marginTop: !isHorizontal ? (goingDown ? 0 : -30) : 0,
-                }}
-              />
-            );
-          })}
-        </AnimatePresence>
-      </div>
+        {/* Profile Image with Lightning Glow */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+          className="relative mb-8"
+        >
+          {/* Radial Lightning Effect */}
+          <div className="absolute inset-0 bg-emerald-500/30 blur-[60px] rounded-full transform scale-150 pointer-events-none" />
+          <div className="absolute inset-0 bg-blue-500/20 blur-[50px] rounded-full transform scale-110 pointer-events-none -translate-x-4 translate-y-4" />
 
-      {/* 4. Core Typography content */}
-      <div className="z-10 container flex flex-col items-center text-center px-4 mt-6 md:mt-12 pb-12">
-        <div className="animate-hero-fade max-w-5xl">
-          <h1 className="text-[2.75rem] sm:text-6xl md:text-7xl lg:text-[5.5rem] font-bold tracking-tighter mb-4 md:mb-6 text-[#f8fafc] leading-[1.05]">
-            Architecting Scalable
-            <br className="hidden sm:block" />
-            Backend Systems
-          </h1>
-          <p className="text-base sm:text-lg md:text-xl text-slate-400 max-w-2xl mx-auto font-light leading-relaxed mb-12 sm:mb-16">
-            Designing highly available data pipelines, robust enterprise APIs, and fault-tolerant microservices built for extreme scale.
-          </p>
-        </div>
+          {/* Image Container */}
+          <div className="relative w-32 h-32 md:w-40 md:h-40 rounded-3xl overflow-hidden border border-white/20 shadow-2xl bg-black">
+            <Image
+              src="/me.jpeg"
+              alt="Karthik H Nair"
+              fill
+              className="object-cover"
+              priority
+            />
+          </div>
+        </motion.div>
 
-        {/* 5. Mosey-Inspired System Dock */}
-        <div className="animate-hero-fade-delayed opacity-0 flex flex-col md:flex-row items-center font-jetbrains text-xs text-slate-400 bg-white/5 backdrop-blur-xl border border-white/10 p-1 md:p-1.5 rounded-xl md:rounded-lg shadow-2xl">
-          {/* Active Status Segment */}
-          <div className="flex items-center gap-2 px-4 py-2.5 md:py-1.5 border-b md:border-b-0 md:border-r border-white/10 w-full md:w-auto justify-center">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-            </span>
-            <span className="text-emerald-400 font-medium tracking-wide">SYSTEM ACTIVE</span>
+        {/* Core Subtext Quote */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.8, delay: 0.3, ease: "easeOut" }}
+          className="max-w-3xl mb-12 sm:mb-16"
+        >
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight text-white mb-2 leading-tight">
+            Engineering systems. <span className="text-emerald-400">Tracking growth.</span>
+          </h2>
+          <span className="font-serif italic text-xl md:text-2xl text-slate-300">
+            Building in public.
+          </span>
+        </motion.div>
+
+        {/* Animated Terminal Window */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.8, delay: 0.6, ease: "easeOut" }}
+          className="w-full max-w-2xl mx-auto bg-[#0d0d0d] border border-white/10 rounded-xl overflow-hidden shadow-2xl text-left"
+        >
+          {/* Terminal Header */}
+          <div className="flex items-center gap-2 px-4 py-3 bg-white/5 border-b border-white/10">
+            <div className="flex gap-1.5">
+              <div className="w-3 h-3 rounded-full bg-red-500/80" />
+              <div className="w-3 h-3 rounded-full bg-amber-500/80" />
+              <div className="w-3 h-3 rounded-full bg-green-500/80" />
+            </div>
+            <div className="flex-1 text-center font-jetbrains text-xs text-slate-400 flex items-center justify-center gap-2">
+              <Terminal className="w-3.5 h-3.5" /> guest@karthik-portfolio:~
+            </div>
           </div>
 
-          {/* Metric: Location & Uptime */}
-          <div className="flex items-center gap-2.5 px-4 py-2.5 md:py-1.5 border-b md:border-b-0 md:border-r border-white/10 shrink-0 w-full md:w-auto justify-center">
-            <MapPin className="w-4 h-4 text-slate-500" />
-            <span className="text-slate-300">Pune, IN</span>
-            <span className="text-slate-600">|</span>
-            <span className="text-slate-300">99.9% Uptime</span>
-          </div>
+          {/* Terminal Body */}
+          <div className="p-6 md:p-8 font-jetbrains text-sm md:text-base leading-relaxed min-h-[220px]">
+            {terminalLines.slice(0, lastVisibleLineIndex + 1).map((line, index) => {
+              const previousCharsCount = terminalLines.slice(0, index).reduce((acc, l) => acc + l.text.length, 0);
+              const renderableLength = Math.max(0, Math.min(line.text.length, visibleChars - previousCharsCount));
+              
+              const isLastLine = index === terminalLines.length - 1;
+              const isStaticFinished = visibleChars >= totalChars;
 
-          {/* Metric: Latency */}
-          <div className="flex items-center gap-2 px-4 py-2.5 md:py-1.5 border-b md:border-b-0 md:border-r border-white/10 min-w-0 md:min-w-[100px] justify-center w-full md:w-auto">
-            <Activity className="w-4 h-4 text-blue-400" />
-            <span className="text-slate-300">{latency}ms</span>
+              return (
+                <div
+                  key={index}
+                  className={`mb-1 min-h-[1.5rem] break-all sm:break-normal ${line.isCommand ? 'text-blue-400 font-semibold mt-4 first:mt-0' : 'text-slate-300'}`}
+                >
+                  {line.text.substring(0, renderableLength)}
+                  
+                  {/* Append Rotating Text or Static Cursor */}
+                  {isLastLine && isStaticFinished ? (
+                    <RotatingText texts={rotatingTexts} />
+                  ) : index === lastVisibleLineIndex && !isStaticFinished ? (
+                    <motion.span
+                      animate={{ opacity: [1, 0] }}
+                      transition={{ duration: 0.8, repeat: Infinity }}
+                      className="inline-block w-2 ml-1 h-[1.2em] bg-emerald-400 align-middle"
+                    />
+                  ) : null}
+                </div>
+              );
+            })}
           </div>
+        </motion.div>
 
-          {/* Tech Stack Segment */}
-          <div className="flex items-center gap-2 px-4 py-2.5 md:py-1.5 w-full md:w-auto justify-center">
-            <Server className="w-4 h-4 text-slate-500 mr-1" />
-            <span className="px-1.5 py-0.5 rounded bg-black/40 text-slate-300 shadow-inner">TypeScript</span>
-            <span className="px-1.5 py-0.5 rounded bg-black/40 text-slate-300 shadow-inner">Node.js</span>
-            <span className="px-1.5 py-0.5 rounded bg-black/40 text-slate-300 shadow-inner">Redis</span>
-          </div>
-        </div>
       </div>
     </section>
   );

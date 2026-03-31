@@ -4,6 +4,7 @@ import { LearningLab } from "@/components/LearningLab";
 import { GardenTeaser } from "@/components/GardenTeaser";
 import { ProfessionalCore } from "@/components/ProfessionalCore";
 import { Footer } from "@/components/Footer";
+export const dynamic = "force-dynamic";
 
 export default function HomePage() {
   return (

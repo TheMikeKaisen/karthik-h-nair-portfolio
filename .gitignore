@@ -12,6 +12,8 @@
 
 # testing
 /coverage
+/src-old
+/src-redesigned
 
 # next.js
 /.next/
