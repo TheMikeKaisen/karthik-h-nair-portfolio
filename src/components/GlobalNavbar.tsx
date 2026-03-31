@@ -7,8 +7,6 @@ import { Menu, X, CalendarDays, Globe, Mail } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const links = [
-  { name: "projects", href: "/projects" },
-  { name: "lab", href: "/lab" },
   { name: "the Garden", href: "/garden", highlight: true },
 ];
 
@@ -59,13 +57,9 @@ export function GlobalNavbar() {
 
           {/* Social / Action Icons (Circular Pills) */}
           <div className="flex items-center gap-2 ml-4">
-            <Link href="/calendar" className="p-2.5 rounded-full border border-transparent hover:border-white/10 hover:bg-white/5 text-slate-300 hover:text-white transition-all">
-              <CalendarDays className="w-4 h-4" />
-            </Link>
-            <Link href="https://linkedin.com" target="_blank" className="p-2.5 rounded-full border border-transparent hover:border-white/10 hover:bg-white/5 text-slate-300 hover:text-white transition-all">
-              <Globe className="w-4 h-4" />
-            </Link>
-            <Link href="mailto:contact@example.com" className="p-2.5 rounded-full border border-transparent hover:border-white/10 hover:bg-white/5 text-slate-300 hover:text-white transition-all">
+           
+            
+            <Link href="mailto:h.karthiknair@gmail.com" className="p-2.5 rounded-full border border-transparent hover:border-white/10 hover:bg-white/5 text-slate-300 hover:text-white transition-all">
               <Mail className="w-4 h-4" />
             </Link>
           </div>
@@ -109,13 +103,9 @@ export function GlobalNavbar() {
             ))}
             
             <div className="flex items-center gap-4 mt-2 pt-6 border-t border-white/10 w-[80%] justify-center">
-              <Link href="/calendar" className="p-3 rounded-full bg-white/5 text-slate-300 hover:text-white">
-                <CalendarDays className="w-5 h-5" />
-              </Link>
-              <Link href="https://linkedin.com" target="_blank" className="p-3 rounded-full bg-white/5 text-slate-300 hover:text-white">
-                <Globe className="w-5 h-5" />
-              </Link>
-              <Link href="mailto:contact@example.com" className="p-3 rounded-full bg-white/5 text-slate-300 hover:text-white">
+              
+              
+              <Link href="mailto:h.karthiknair@gmail.com" className="p-3 rounded-full bg-white/5 text-slate-300 hover:text-white">
                 <Mail className="w-5 h-5" />
               </Link>
             </div>

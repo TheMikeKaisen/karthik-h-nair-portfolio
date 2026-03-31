@@ -13,6 +13,7 @@
     "@sanity/code-input": "^7.0.12",
     "@sanity/image-url": "^1.2.0",
     "@sanity/vision": "^4.22.0",
+    "@tabler/icons-react": "^3.41.1",
     "@types/react-syntax-highlighter": "^15.5.13",
     "clsx": "^2.1.1",
     "framer-motion": "^12.38.0",
