@@ -27,3 +27,10 @@ export interface Article {
   difficultyLevel?: string;
   categoryName?: string;
 }
+
+export interface DevLog {
+  _id: string;
+  title: string;
+  slug: { current: string };
+  publishedAt: string;
+}

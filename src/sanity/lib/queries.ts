@@ -40,3 +40,37 @@ export const recentActivitiesQuery = groq`*[_type == "activity" && isTopSkill !=
   difficulty,
   "categoryName": category->title
 }`;
+
+// 5. Fetch all published Articles for The Garden
+export const publishedArticlesQuery = groq`*[_type == "article" && isPublished == true] | order(publishedAt desc) {
+  _id,
+  title,
+  slug,
+  mainImage,
+  excerpt,
+  publishedAt,
+  difficultyLevel,
+  "categoryName": category->title
+}`;
+
+// 6. Fetch all Dev Logs for The Garden
+export const devLogsQuery = groq`*[_type == "devLog"] | order(publishedAt desc) {
+  _id,
+  title,
+  slug,
+  publishedAt
+}`;
+
+// Add this to your queries.ts
+export const postBySlugQuery = groq`*[( _type == "article" || _type == "devLog" ) && slug.current == $slug][0] {
+  _type,
+  title,
+  publishedAt,
+  content, // For Articles
+  body,    // For Dev Logs (if named differently)
+  mainImage,
+  difficultyLevel,
+  isPremium,
+  "categoryName": category->title,
+  "relatedProject": relatedProject->{title, slug}
+}`;

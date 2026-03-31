@@ -2,10 +2,13 @@
 
 import React from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, Variants } from 'framer-motion';
 import { Terminal, ArrowRight } from 'lucide-react';
+import Image from 'next/image';
+import { urlFor } from '@/sanity/lib/image';
+import { Article, DevLog } from '@/types';
 
-const containerVariants = {
+const containerVariants: Variants = {
   hidden: { opacity: 0 },
   show: {
     opacity: 1,
@@ -13,31 +16,31 @@ const containerVariants = {
   }
 };
 
-const itemVariants = {
+const itemVariants: Variants = {
   hidden: { opacity: 0, y: 15 },
   show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 350, damping: 25 } }
 };
 
-// Mock Data
-const MOCK_ARTICLES = [
-  { id: '1', title: 'Architecting Scalable Node.js Microservices', date: 'Mar 15, 2026', excerpt: 'A deep dive into building fault-tolerant microservices using gRPC, Redis, and horizontal scaling strategies.', slug: 'architecting-scalable-node' },
-  { id: '2', title: 'Why I Prefer Postgres over NoSQL for Financial Data', date: 'Feb 28, 2026', excerpt: 'ACID compliance isn\'t just a buzzword. Exploring the robust guarantees of PostgreSQL when handling ledger transactions in high-throughput environments.', slug: 'postgres-financial-data' },
-];
+interface GardenClientProps {
+  articles: Article[];
+  logs: DevLog[];
+}
 
-const MOCK_LOGS = [
-  { id: 'l1', title: 'Migrated primary auth DB from AWS RDS to PlanetScale.', timestamp: '2026-03-31T08:45:00Z' },
-  { id: 'l2', title: 'Resolved memory leak in the WebSocket handling layer. CPU usage down 40% across clusters.', timestamp: '2026-03-29T14:20:00Z' },
-  { id: 'l3', title: 'Updated Redis cache invalidation strategy for user sessions.', timestamp: '2026-03-25T01:15:00Z' },
-  { id: 'l4', title: 'Deployed new egress pipeline for real-time analytics aggregation.', timestamp: '2026-03-20T18:30:00Z' },
-];
-
-export default function GardenClient() {
+export default function GardenClient({ articles, logs }: GardenClientProps) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const view = searchParams.get('v') || 'articles';
 
   const setView = (v: 'articles' | 'logs') => {
     router.push(`?v=${v}`, { scroll: false });
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
   };
 
   return (
@@ -93,10 +96,25 @@ export default function GardenClient() {
               exit={{ opacity: 0, y: -10, filter: "blur(4px)", transition: { duration: 0.2 } }}
               className="flex flex-col gap-10"
             >
-              {MOCK_ARTICLES.map((article) => (
-                <motion.article key={article.id} variants={itemVariants} className="group cursor-pointer">
+              {articles.map((article) => (
+                <motion.article key={article._id} variants={itemVariants} className="group cursor-pointer">
+                  {article.mainImage && (
+                    <div className="mb-6 w-full h-48 md:h-64 relative rounded-xl overflow-hidden bg-white/5 border border-white/10">
+                      <Image
+                        src={urlFor(article.mainImage).url()}
+                        alt={article.title}
+                        fill
+                        className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                      />
+                    </div>
+                  )}
                   <div className="mb-2 flex items-center gap-3">
-                    <span className="text-xs font-jetbrains text-emerald-400/80 tracking-widest uppercase">{article.date}</span>
+                    <span className="text-xs font-jetbrains text-emerald-400/80 tracking-widest uppercase">{formatDate(article.publishedAt)}</span>
+                    {article.categoryName && (
+                      <span className="text-xs font-jetbrains px-2 py-0.5 rounded-full bg-white/5 text-slate-400 tracking-widest uppercase border border-white/10">
+                        {article.categoryName}
+                      </span>
+                    )}
                   </div>
                   <h2 className="text-2xl md:text-3xl font-bold text-slate-200 mb-3 group-hover:text-blue-400 transition-colors tracking-tight">{article.title}</h2>
                   <p className="text-slate-400 text-base md:text-lg font-light leading-relaxed max-w-2xl mb-4">{article.excerpt}</p>
@@ -105,6 +123,9 @@ export default function GardenClient() {
                   </div>
                 </motion.article>
               ))}
+              {articles.length === 0 && (
+                <div className="text-slate-500 font-jetbrains text-sm">No articles published yet.</div>
+              )}
             </motion.div>
           ) : (
             <motion.div
@@ -115,17 +136,22 @@ export default function GardenClient() {
               exit={{ opacity: 0, y: -10, filter: "blur(4px)", transition: { duration: 0.2 } }}
               className="flex flex-col gap-3 font-jetbrains"
             >
-              {MOCK_LOGS.map((log) => (
-                <motion.div key={log.id} variants={itemVariants} className="flex gap-4 p-4 rounded-lg bg-black/40 border border-white/5 hover:border-white/10 hover:bg-white/5 transition-colors group">
+              {logs.map((log) => (
+                <motion.div key={log._id} variants={itemVariants} className="flex gap-4 p-4 rounded-lg bg-black/40 border border-white/5 hover:border-white/10 hover:bg-white/5 transition-colors group cursor-pointer">
                   <div className="flex-shrink-0 mt-0.5">
                     <Terminal className="w-4 h-4 text-slate-600 group-hover:text-emerald-400 transition-colors" />
                   </div>
                   <div className="flex flex-col gap-1 w-full relative">
-                    <span className="text-[10px] text-slate-500 uppercase tracking-widest">{log.timestamp}</span>
+                    <span className="text-[10px] text-slate-500 uppercase tracking-widest">
+                      {new Date(log.publishedAt).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' })}
+                    </span>
                     <p className="text-sm text-slate-300 leading-relaxed font-light">{log.title}</p>
                   </div>
                 </motion.div>
               ))}
+              {logs.length === 0 && (
+                <div className="text-slate-500 text-sm">No system logs executed sequence.</div>
+              )}
             </motion.div>
           )}
         </AnimatePresence>
