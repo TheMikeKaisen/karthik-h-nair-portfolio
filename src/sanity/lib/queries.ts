@@ -28,7 +28,13 @@ export const topSkillsQuery = groq`*[_type == "activity" && isTopSkill == true] 
   _id,
   title,
   repoUrl,
-  difficulty,
+  description,
+  "difficulty": select(
+    difficulty == "beginner" => "Beginner",
+    difficulty == "intermediate" => "Intermediate",
+    difficulty == "advanced" => "Advanced",
+    "Beginner"
+  ),
   "categoryName": category->title
 }`;
 
@@ -37,7 +43,13 @@ export const recentActivitiesQuery = groq`*[_type == "activity" && isTopSkill !=
   _id,
   title,
   repoUrl,
-  difficulty,
+  description,
+  "difficulty": select(
+    difficulty == "beginner" => "Beginner",
+    difficulty == "intermediate" => "Intermediate",
+    difficulty == "advanced" => "Advanced",
+    "Beginner"
+  ),
   "categoryName": category->title
 }`;
 

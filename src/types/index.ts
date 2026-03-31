@@ -14,6 +14,9 @@ export interface Activity {
   repoUrl?: string;
   difficulty: "Beginner" | "Intermediate" | "Advanced";
   categoryName?: string;
+  description?: string;
+  tags?: string[];
+  dateStarted?: string;
   isTopSkill?: boolean;
 }
 
