@@ -24,7 +24,16 @@ export const featuredArticlesQuery = groq`*[_type == "article" && featured == tr
 }`;
 
 // 3. Fetch top "Learning Lab" skills
-export const topSkillsQuery = groq`*[_type == "activity" && isTopSkill == true] {
+export const topSkillsQuery = groq`*[_type == "activity" && isTopSkill == true] | order(_createdAt desc) {
+  _id,
+  title,
+  repoUrl,
+  difficulty,
+  "categoryName": category->title
+}`;
+
+// 4. Fetch recent non-pinned Activities
+export const recentActivitiesQuery = groq`*[_type == "activity" && isTopSkill != true] | order(_createdAt desc)[0...5] {
   _id,
   title,
   repoUrl,

@@ -1,33 +1,19 @@
-import { sanityFetch } from "@/sanity/lib/client";
-import { featuredProjectsQuery } from "@/sanity/lib/queries";
-import { Project } from "@/types";
 import { Hero } from "@/components/Hero";
+import { ProjectGrid } from "@/components/ProjectGrid";
+import { LearningLab } from "@/components/LearningLab";
+import { GardenTeaser } from "@/components/GardenTeaser";
+import { Footer } from "@/components/Footer";
 
-export default async function HomePage() {
-  const projects = await sanityFetch<Project[]>({ query: featuredProjectsQuery });
-  console.log(projects)
-
+export default function HomePage() {
   return (
-    <main className="min-h-screen p-4 md:p-8 relative">
-      <Hero />
-
-      {/* MAJOR PROJECTS SECTION */}
-      <section className="max-w-6xl mx-auto">
-        <h2 className="text-3xl font-bold mb-8">Featured Builds</h2>
-        <div className="grid md:grid-cols-2 gap-6">
-          {projects.map((project) => (
-            <div key={project._id} className="p-6 rounded-2xl border border-gray-800 bg-white/5 backdrop-blur-sm">
-              <h3 className="text-xl font-bold">{project.title}</h3>
-              <p className="text-gray-400 mt-2">{project.description}</p>
-              <div className="mt-4 flex gap-2">
-                {project.tags?.map(tag => (
-                  <span key={tag} className="text-xs text-blue-400">#{tag}</span>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-    </main>
+    <>
+      <main className="min-h-screen relative">
+        <Hero />
+        <ProjectGrid />
+        <LearningLab />
+        <GardenTeaser />
+      </main>
+      <Footer />
+    </>
   );
 }
