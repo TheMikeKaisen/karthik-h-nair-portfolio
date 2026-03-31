@@ -7,8 +7,9 @@ import { Suspense } from "react";
 
 function BackButtonLogic() {
   const searchParams = useSearchParams();
-  const view = searchParams.get("v");
-  const href = view ? `/garden?v=${view}` : "/garden";
+  const rawView = searchParams.get("v");
+  const view = rawView === 'logs' ? 'logs' : 'articles';
+  const href = `/garden?v=${view}`;
 
   return (
     <Link 

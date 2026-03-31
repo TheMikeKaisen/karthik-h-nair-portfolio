@@ -74,3 +74,27 @@ export const postBySlugQuery = groq`*[( _type == "article" || _type == "devLog" 
   "categoryName": category->title,
   "relatedProject": relatedProject->{title, slug}
 }`;
+
+// 7. Fetch single project by Slug
+export const projectBySlugQuery = groq`*[_type == "project" && slug.current == $slug][0] {
+  _id,
+  title,
+  slug,
+  mainImage,
+  description,
+  status,
+  publishedAt,
+  tags,
+  githubUrl,
+  liveUrl,
+  body
+}`;
+
+// 8. Fetch the strictly next project chronologically
+export const nextProjectQuery = groq`*[_type == "project" && publishedAt > $currentPublishedAt] | order(publishedAt asc)[0] {
+  _id,
+  title,
+  slug,
+  mainImage,
+  description
+}`;

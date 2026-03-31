@@ -30,7 +30,10 @@ interface GardenClientProps {
 export default function GardenClient({ articles, logs }: GardenClientProps) {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const view = searchParams.get('v') || 'articles';
+  
+  // Strict URL Parameter Validation
+  const rawView = searchParams.get('v');
+  const view = rawView === 'logs' ? 'logs' : 'articles';
 
   const setView = (v: 'articles' | 'logs') => {
     router.push(`?v=${v}`, { scroll: false });
