@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { motion, AnimatePresence, Variants } from 'framer-motion';
 import { Terminal, ArrowRight } from 'lucide-react';
 import Image from 'next/image';
@@ -97,31 +98,33 @@ export default function GardenClient({ articles, logs }: GardenClientProps) {
               className="flex flex-col gap-10"
             >
               {articles.map((article) => (
-                <motion.article key={article._id} variants={itemVariants} className="group cursor-pointer">
-                  {article.mainImage && (
-                    <div className="mb-6 w-full h-48 md:h-64 relative rounded-xl overflow-hidden bg-white/5 border border-white/10">
-                      <Image
-                        src={urlFor(article.mainImage).url()}
-                        alt={article.title}
-                        fill
-                        className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
-                      />
-                    </div>
-                  )}
-                  <div className="mb-2 flex items-center gap-3">
-                    <span className="text-xs font-jetbrains text-emerald-400/80 tracking-widest uppercase">{formatDate(article.publishedAt)}</span>
-                    {article.categoryName && (
-                      <span className="text-xs font-jetbrains px-2 py-0.5 rounded-full bg-white/5 text-slate-400 tracking-widest uppercase border border-white/10">
-                        {article.categoryName}
-                      </span>
+                <Link key={article._id} href={`/garden/${article.slug.current}?v=articles`}>
+                  <motion.article variants={itemVariants} className="group cursor-pointer">
+                    {article.mainImage && (
+                      <div className="mb-6 w-full h-48 md:h-64 relative rounded-xl overflow-hidden bg-white/5 border border-white/10">
+                        <Image
+                          src={urlFor(article.mainImage).url()}
+                          alt={article.title}
+                          fill
+                          className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                        />
+                      </div>
                     )}
-                  </div>
-                  <h2 className="text-2xl md:text-3xl font-bold text-slate-200 mb-3 group-hover:text-blue-400 transition-colors tracking-tight">{article.title}</h2>
-                  <p className="text-slate-400 text-base md:text-lg font-light leading-relaxed max-w-2xl mb-4">{article.excerpt}</p>
-                  <div className="flex items-center gap-2 text-sm font-jetbrains font-semibold text-emerald-400 group-hover:text-emerald-300 transition-colors">
-                    Read_More <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                  </div>
-                </motion.article>
+                    <div className="mb-2 flex items-center gap-3">
+                      <span className="text-xs font-jetbrains text-emerald-400/80 tracking-widest uppercase">{formatDate(article.publishedAt)}</span>
+                      {article.categoryName && (
+                        <span className="text-xs font-jetbrains px-2 py-0.5 rounded-full bg-white/5 text-slate-400 tracking-widest uppercase border border-white/10">
+                          {article.categoryName}
+                        </span>
+                      )}
+                    </div>
+                    <h2 className="text-2xl md:text-3xl font-bold text-slate-200 mb-3 group-hover:text-blue-400 transition-colors tracking-tight">{article.title}</h2>
+                    <p className="text-slate-400 text-base md:text-lg font-light leading-relaxed max-w-2xl mb-4">{article.excerpt}</p>
+                    <div className="flex items-center gap-2 text-sm font-jetbrains font-semibold text-emerald-400 group-hover:text-emerald-300 transition-colors">
+                      Read_More <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                    </div>
+                  </motion.article>
+                </Link>
               ))}
               {articles.length === 0 && (
                 <div className="text-slate-500 font-jetbrains text-sm">No articles published yet.</div>
@@ -137,17 +140,19 @@ export default function GardenClient({ articles, logs }: GardenClientProps) {
               className="flex flex-col gap-3 font-jetbrains"
             >
               {logs.map((log) => (
-                <motion.div key={log._id} variants={itemVariants} className="flex gap-4 p-4 rounded-lg bg-black/40 border border-white/5 hover:border-white/10 hover:bg-white/5 transition-colors group cursor-pointer">
-                  <div className="flex-shrink-0 mt-0.5">
-                    <Terminal className="w-4 h-4 text-slate-600 group-hover:text-emerald-400 transition-colors" />
-                  </div>
-                  <div className="flex flex-col gap-1 w-full relative">
-                    <span className="text-[10px] text-slate-500 uppercase tracking-widest">
-                      {new Date(log.publishedAt).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' })}
-                    </span>
-                    <p className="text-sm text-slate-300 leading-relaxed font-light">{log.title}</p>
-                  </div>
-                </motion.div>
+                <Link key={log._id} href={`/garden/${log.slug.current}?v=logs`} className="group md:w-3/4">
+                  <motion.div variants={itemVariants} className="flex gap-4 p-4 rounded-lg bg-black/40 border border-white/5 hover:border-white/10 hover:bg-white/5 transition-colors cursor-pointer">
+                    <div className="flex-shrink-0 mt-0.5">
+                      <Terminal className="w-4 h-4 text-slate-600 group-hover:text-emerald-400 transition-colors" />
+                    </div>
+                    <div className="flex flex-col gap-1 w-full relative">
+                      <span className="text-[10px] text-slate-500 uppercase tracking-widest">
+                        {new Date(log.publishedAt).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' })}
+                      </span>
+                      <p className="text-sm text-slate-300 leading-relaxed font-light">{log.title}</p>
+                    </div>
+                  </motion.div>
+                </Link>
               ))}
               {logs.length === 0 && (
                 <div className="text-slate-500 text-sm">No system logs executed sequence.</div>
