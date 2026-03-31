@@ -30,3 +30,17 @@ body {
   font-family: var(--font-sans), Arial, sans-serif;
   transition: background-color 0.3s ease, color 0.3s ease;
 }
+
+@keyframes hero-fade {
+  0% { opacity: 0; transform: translateY(30px); filter: blur(5px); }
+  100% { opacity: 1; transform: translateY(0); filter: blur(0px); }
+}
+
+.animate-hero-fade {
+  animation: hero-fade 0.8s ease-out forwards;
+}
+
+.animate-hero-fade-delayed {
+  opacity: 0;
+  animation: hero-fade 0.8s ease-out 0.2s forwards;
+}

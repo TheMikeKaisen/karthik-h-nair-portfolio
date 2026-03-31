@@ -2,8 +2,8 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { useTheme } from "next-themes";
-import { Moon, Sun, Menu, X, Code2 } from "lucide-react";
+import { usePathname } from "next/navigation";
+import { Menu, X, Code2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const links = [
@@ -15,13 +15,18 @@ const links = [
 ];
 
 export function GlobalNavbar() {
-  const { theme, setTheme } = useTheme();
+  const pathname = usePathname();
   const [mounted, setMounted] = React.useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
 
   React.useEffect(() => {
     setMounted(true);
   }, []);
+
+  if (pathname?.startsWith("/studio")) {
+    return null;
+  }
+
 
   return (
     <header className="sticky top-0 z-50 w-full glass border-b border-t-0 border-x-0">
@@ -44,28 +49,10 @@ export function GlobalNavbar() {
             </Link>
           ))}
           
-          {/* Theme Toggle */}
-          {mounted && (
-            <button
-              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-              className="p-2 rounded-full hover:bg-white/10 transition-colors"
-              aria-label="Toggle theme"
-            >
-              {theme === "dark" ? <Sun className="w-5 h-5 text-amber-300" /> : <Moon className="w-5 h-5 text-slate-700" />}
-            </button>
-          )}
         </nav>
 
         {/* Mobile Toggle */}
         <div className="flex items-center gap-4 md:hidden">
-          {mounted && (
-            <button
-              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-              className="p-2 rounded-full hover:bg-white/5 transition-colors"
-            >
-              {theme === "dark" ? <Sun className="w-5 h-5 text-amber-300" /> : <Moon className="w-5 h-5 text-slate-700" />}
-            </button>
-          )}
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             className="p-2 rounded-md hover:bg-white/5 transition-colors"
