@@ -1,6 +1,6 @@
 "use client"
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion, AnimatePresence, Variants } from 'framer-motion';
@@ -38,6 +38,16 @@ export default function GardenClient({ articles, logs }: GardenClientProps) {
   const setView = (v: 'articles' | 'logs') => {
     router.push(`?v=${v}`, { scroll: false });
   };
+
+  useEffect(() => {
+  const handlePageShow = (e: PageTransitionEvent) => {
+    if (e.persisted) {
+      router.refresh();
+    }
+  };
+  window.addEventListener("pageshow", handlePageShow);
+  return () => window.removeEventListener("pageshow", handlePageShow);
+}, [router]);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {

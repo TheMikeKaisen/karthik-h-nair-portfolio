@@ -86,10 +86,34 @@ export function Hero() {
 
   // Iron-clad hydration trigger for BfCache restorations mapped perfectly to the typewriter engine.
   // We execute a native string-slice interval mapping against React state precisely rendering at ~50fps.
+  // useEffect(() => {
+  //   setRenderKey(Date.now());
+  //   setVisibleChars(0);
+    
+  //   const initialDelay = setTimeout(() => {
+  //     const interval = setInterval(() => {
+  //       setVisibleChars((prev) => {
+  //         if (prev >= totalChars) {
+  //           clearInterval(interval);
+  //           return prev;
+  //         }
+  //         return prev + 1;
+  //       });
+  //     }, 20); // 143 keys * 20ms = ~2.8 seconds total rendering sequence
+      
+  //     return () => clearInterval(interval);
+  //   }, 1000);
+    
+  //   return () => clearTimeout(initialDelay);
+  // }, [totalChars]);
+
   useEffect(() => {
+  const startAnimation = () => {
     setRenderKey(Date.now());
     setVisibleChars(0);
-    
+
+    let intervalCleanup: (() => void) | null = null;
+
     const initialDelay = setTimeout(() => {
       const interval = setInterval(() => {
         setVisibleChars((prev) => {
@@ -99,13 +123,31 @@ export function Hero() {
           }
           return prev + 1;
         });
-      }, 20); // 143 keys * 20ms = ~2.8 seconds total rendering sequence
-      
-      return () => clearInterval(interval);
+      }, 20);
+      intervalCleanup = () => clearInterval(interval);
     }, 1000);
-    
-    return () => clearTimeout(initialDelay);
-  }, [totalChars]);
+
+    return () => {
+      clearTimeout(initialDelay);
+      intervalCleanup?.();
+    };
+  };
+
+  let cleanupFn = startAnimation();
+
+  const handlePageShow = (e: PageTransitionEvent) => {
+    if (e.persisted) {
+      cleanupFn?.();
+      cleanupFn = startAnimation();
+    }
+  };
+
+  window.addEventListener("pageshow", handlePageShow);
+  return () => {
+    cleanupFn?.();
+    window.removeEventListener("pageshow", handlePageShow);
+  };
+}, [totalChars]);
 
   // Determine safely which lines should be physically rendered in the DOM right now
   let lastVisibleLineIndex = 0;
