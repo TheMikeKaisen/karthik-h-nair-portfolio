@@ -17,6 +17,9 @@
 /.next/
 /out/
 
+# antigravity guidance
+agGuidance.md
+
 # production
 /build
 

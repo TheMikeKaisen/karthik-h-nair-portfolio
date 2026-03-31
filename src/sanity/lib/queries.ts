@@ -24,10 +24,77 @@ export const featuredArticlesQuery = groq`*[_type == "article" && featured == tr
 }`;
 
 // 3. Fetch top "Learning Lab" skills
-export const topSkillsQuery = groq`*[_type == "activity" && isTopSkill == true] {
+export const topSkillsQuery = groq`*[_type == "activity" && isTopSkill == true] | order(_createdAt desc) {
   _id,
   title,
   repoUrl,
   difficulty,
   "categoryName": category->title
+}`;
+
+// 4. Fetch recent non-pinned Activities
+export const recentActivitiesQuery = groq`*[_type == "activity" && isTopSkill != true] | order(_createdAt desc)[0...5] {
+  _id,
+  title,
+  repoUrl,
+  difficulty,
+  "categoryName": category->title
+}`;
+
+// 5. Fetch all published Articles for The Garden
+export const publishedArticlesQuery = groq`*[_type == "article" && isPublished == true] | order(publishedAt desc) {
+  _id,
+  title,
+  slug,
+  mainImage,
+  excerpt,
+  publishedAt,
+  difficultyLevel,
+  "categoryName": category->title
+}`;
+
+// 6. Fetch all Dev Logs for The Garden
+export const devLogsQuery = groq`*[_type == "devLog"] | order(publishedAt desc) {
+  _id,
+  title,
+  slug,
+  publishedAt
+}`;
+
+// Add this to your queries.ts
+export const postBySlugQuery = groq`*[( _type == "article" || _type == "devLog" ) && slug.current == $slug][0] {
+  _type,
+  title,
+  publishedAt,
+  content, // For Articles
+  body,    // For Dev Logs (if named differently)
+  mainImage,
+  difficultyLevel,
+  isPremium,
+  "categoryName": category->title,
+  "relatedProject": relatedProject->{title, slug}
+}`;
+
+// 7. Fetch single project by Slug
+export const projectBySlugQuery = groq`*[_type == "project" && slug.current == $slug][0] {
+  _id,
+  title,
+  slug,
+  mainImage,
+  description,
+  status,
+  publishedAt,
+  tags,
+  githubUrl,
+  liveUrl,
+  body
+}`;
+
+// 8. Fetch the strictly next project chronologically
+export const nextProjectQuery = groq`*[_type == "project" && publishedAt > $currentPublishedAt] | order(publishedAt asc)[0] {
+  _id,
+  title,
+  slug,
+  mainImage,
+  description
 }`;
