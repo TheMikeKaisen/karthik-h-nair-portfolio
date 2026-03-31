@@ -1,25 +1,16 @@
 import { sanityFetch } from "@/sanity/lib/client";
-import { experienceQuery, educationQuery, skillsQuery } from "@/sanity/lib/queries";
-import { Experience, Education, Skill } from "@/types";
-import { GitCommit, Briefcase, GraduationCap, Database, Code2, Server } from "lucide-react";
+import { experienceQuery, educationQuery } from "@/sanity/lib/queries";
+import { Experience, Education } from "@/types";
+import { GitCommit, Briefcase, GraduationCap, Database, MapPin, Activity } from "lucide-react";
 import Image from "next/image";
 import { urlFor } from "@/sanity/lib/image";
 import { PortableTextRenderer } from "@/components/PortableTextRenderer";
 
 export async function ProfessionalCore() {
-  const [experience, education, skills] = await Promise.all([
+  const [experience, education] = await Promise.all([
     sanityFetch<Experience[]>({ query: experienceQuery }),
     sanityFetch<Education[]>({ query: educationQuery }),
-    sanityFetch<Skill[]>({ query: skillsQuery }),
   ]);
-
-  // Group Skills natively by category for the Bento display
-  const groupedSkills = skills.reduce((acc, skill) => {
-    const category = skill.categoryName || "Core";
-    if (!acc[category]) acc[category] = [];
-    acc[category].push(skill);
-    return acc;
-  }, {} as Record<string, Skill[]>);
 
   const formatDate = (dateString?: string) => {
     if (!dateString) return "Present";
@@ -28,174 +19,159 @@ export async function ProfessionalCore() {
 
   return (
     <section className="py-24 container mx-auto px-4 border-t border-white/5 bg-[#0a0a0a] z-10 relative">
-      <div className="mb-16 md:mb-24 flex flex-col items-center md:items-start text-center md:text-left">
-        <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-4 flex items-center justify-center md:justify-start gap-4 text-[#f8fafc]">
-          <Database className="w-8 h-8 text-emerald-400" />
-          Professional Core
+      {/* Section Title */}
+      <div className="mb-20">
+        <div className="flex items-center gap-2 text-emerald-500 font-jetbrains text-xs tracking-[0.3em] uppercase mb-4">
+          <Database className="w-4 h-4" /> Making_of_an_Engineer
+        </div>
+        <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-[#f8fafc]">
+          Professional <span className="text-emerald-500">Core</span>
         </h2>
-        <p className="text-slate-400 text-lg max-w-2xl font-light">
-          A trace of my deployment history, academic foundations, and the active technological integrations powering my architecture.
-        </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20">
-
-        {/* Left Column: The Deployment Timeline */}
-        <div className="lg:col-span-5">
-          <div className="sticky top-24">
-            <h3 className="text-xl font-bold mb-8 flex items-center gap-3 text-slate-200 uppercase tracking-widest font-jetbrains text-sm">
-              <GitCommit className="w-5 h-5 text-slate-400" /> Execution Trace
-            </h3>
-
-            <div className="relative pl-6 sm:pl-8 border-l border-white/10 space-y-12">
-              {experience.map((exp, index) => {
-                const isCurrentRole = exp.isCurrent;
-                const isLast = index === experience.length - 1;
-
-                return (
-                  <div key={exp._id} className="relative group">
-                    {/* The Timeline Node */}
-                    <div className="absolute -left-[31px] sm:-left-[39px] flex items-center justify-center p-1 bg-[#0a0a0a]">
-                      {isCurrentRole ? (
-                        <div className="relative flex h-3.5 w-3.5 items-center justify-center">
-                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                          <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.8)]"></span>
-                        </div>
-                      ) : (
-                        <div className="w-2 h-2 rounded-full bg-slate-600 group-hover:bg-slate-400 transition-colors border border-black" />
-                      )}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 lg:gap-x-20 items-start">
+        
+        {/* LEFT COLUMN: EXPERIENCE (Execution Trace) - Spans 5/12 */}
+        <div className="lg:col-span-5 space-y-12">
+          <h3 className="text-sm font-jetbrains uppercase tracking-[0.3em] text-emerald-500 font-bold mb-10 flex items-center gap-3 px-2 border-l-2 border-emerald-500">
+            <GitCommit className="w-4 h-4" /> 01. Professional_Trace
+          </h3>
+          
+          <div className="relative pl-6 border-l border-white/10 space-y-14">
+            {experience.map((exp, idx) => (
+              <div key={exp._id} className="relative group">
+                {/* Timeline Node */}
+                <div className="absolute -left-[33px] flex items-center justify-center p-1 bg-[#0a0a0a]">
+                  {exp.isCurrent ? (
+                    <div className="relative flex h-4 w-4 items-center justify-center">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
                     </div>
-
-                    <div className="flex flex-col gap-1">
-                      {/* Meta Node */}
-                      <div className="flex flex-wrap items-center gap-2 mb-2">
-                        <span className="text-xs font-jetbrains font-semibold tracking-widest uppercase text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded shadow-inner border border-emerald-500/20">
-                          {formatDate(exp.startDate)} — {exp.isCurrent ? "Present" : formatDate(exp.endDate)}
-                        </span>
-                        {exp.location && (
-                          <span className="text-[10px] font-jetbrains uppercase tracking-widest text-slate-500">
-                            // {exp.location}
-                          </span>
-                        )}
-                      </div>
-
-                      {/* Header */}
-                      <h4 className="text-2xl font-bold tracking-tight text-slate-200 group-hover:text-emerald-400 transition-colors">
-                        {exp.role}
-                      </h4>
-                      <span className="text-emerald-500/70 font-semibold mb-3 tracking-wide flex items-center gap-2">
-                        <Briefcase className="w-4 h-4" /> {exp.companyName}
-                      </span>
-
-                      {/* Technical payload mapping */}
-                      {exp.technologies && exp.technologies.length > 0 && (
-                        <div className="flex flex-wrap gap-1.5 mt-2 mb-3">
-                          {exp.technologies.map(tech => (
-                            <span key={tech} className="text-[10px] uppercase font-jetbrains bg-white/5 border border-white/10 text-slate-300 px-2.5 py-1 rounded-sm shadow-inner group-hover:border-white/20 transition-colors">
-                              {tech}
-                            </span>
-                          ))}
-                        </div>
-                      )}
-
-                      {exp.description && (
-                        <div className="prose prose-sm prose-invert max-w-none text-slate-400 leading-relaxed mt-2 prose-p:mb-2 prose-li:my-1">
-                          <PortableTextRenderer content={exp.description} />
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-
-        {/* Right Column: The Bento Grid */}
-        <div className="lg:col-span-7 flex flex-col gap-6">
-
-          {/* Education Box (Top spans full width of right col) */}
-          <div className="glass p-6 sm:p-8 rounded-2xl border border-white/5 hover:border-white/10 transition-colors bg-gradient-to-br from-white/[0.03] to-transparent shadow-2xl relative overflow-hidden group">
-            <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity transform group-hover:scale-110 duration-700 pointer-events-none">
-              <GraduationCap className="w-48 h-48" />
-            </div>
-
-            <h3 className="text-[11px] font-jetbrains uppercase tracking-[0.3em] font-bold text-blue-400 mb-6 flex items-center gap-2">
-              <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse" /> Academic Core
-            </h3>
-
-            <div className="flex flex-col gap-8 relative z-10">
-              {education.map(edu => (
-                <div key={edu._id} className="flex flex-col group/edu">
-                  <div className="flex items-start justify-between mb-2 gap-4">
-                    <div className="flex items-center gap-3 sm:gap-4">
-                      {edu.institutionLogo && (
-                        <div className="relative w-10 h-10 sm:w-12 sm:h-12 flex-shrink-0 bg-white/5 rounded-full border border-white/10 overflow-hidden shadow-inner flex items-center justify-center">
-                          <Image src={urlFor(edu.institutionLogo).url()} alt={edu.institution} fill className="object-cover" />
-                        </div>
-                      )}
-                      <h4 className="text-xl sm:text-2xl font-bold text-slate-200 tracking-tight leading-tight">{edu.institution}</h4>
-                    </div>
-                    {edu.gpa && (
-                      <span className="text-xs font-jetbrains bg-blue-500/10 text-blue-400 px-2 py-1.5 rounded shadow-inner border border-blue-500/20 font-bold tracking-widest mt-1 shrink-0 whitespace-nowrap">
-                        GPA: {edu.gpa}
-                      </span>
-                    )}
-                  </div>
-                  <span className="text-slate-400 font-medium tracking-wide flex items-center gap-2 sm:text-lg mb-1">
-                    {edu.degree} in {edu.fieldOfStudy}
-                  </span>
-                  <span className="text-xs font-jetbrains text-slate-500 uppercase tracking-widest mb-4">
-                    {formatDate(edu.startDate)} — {!edu.endDate ? "Present" : formatDate(edu.endDate)}  {edu.location ? `// ${edu.location}` : ''}
-                  </span>
-
-                  {edu.courses && edu.courses.length > 0 && (
-                    <div className="flex flex-wrap gap-2 mt-2">
-                      {edu.courses.map(course => (
-                        <span key={course} className="text-xs bg-black/40 border border-white/5 text-slate-300 px-3 py-1.5 rounded-md shadow-inner">
-                          {course}
-                        </span>
-                      ))}
-                    </div>
+                  ) : (
+                    <div className="w-2 h-2 rounded-full bg-slate-800 border border-white/10" />
                   )}
                 </div>
-              ))}
-            </div>
-          </div>
 
-          {/* Skills Grid (Dynamic Columns per Category) */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            {Object.entries(groupedSkills).map(([category, catSkills]) => (
-              <div
-                key={category}
-                className="glass p-6 sm:p-8 rounded-2xl border border-white/5 hover:border-white/10 transition-all bg-white/[0.015] hover:bg-white/[0.02] shadow-xl flex flex-col group relative overflow-hidden"
-              >
-                <div className="absolute -right-4 -bottom-4 opacity-5 group-hover:opacity-10 transition-opacity transform group-hover:scale-110 duration-700 pointer-events-none">
-                  {category.toLowerCase().includes('backend') ? <Server className="w-32 h-32" /> : <Code2 className="w-32 h-32" />}
+                {/* Technical Header Bar (Experience) */}
+                <div className="flex items-center justify-between mb-4 border-b border-white/5 pb-2">
+                  <span className="text-[11px] font-jetbrains text-emerald-500/80 bg-emerald-500/5 px-2 py-0.5 rounded border border-emerald-500/10 uppercase tracking-widest">
+                    {formatDate(exp.startDate)} — {exp.isCurrent ? "Active" : formatDate(exp.endDate)}
+                  </span>
+                  <span className="text-[9px] font-jetbrains text-slate-600 uppercase tracking-tighter">
+                    // NODE_ID: 0{idx + 1}
+                  </span>
                 </div>
 
-                <h3 className="text-xs font-jetbrains uppercase tracking-widest font-bold text-emerald-400 mb-6 flex items-center gap-2 border-b border-white/10 pb-4 relative z-10">
-                  <span className="w-2 h-2 rounded-sm bg-emerald-500/50" />
-                  {category} Stack
-                </h3>
+                <div className="space-y-3">
+                  <h4 className="text-2xl font-bold text-slate-200 group-hover:text-emerald-400 transition-colors">
+                    {exp.role}
+                  </h4>
+                  <div className="flex items-center gap-2 text-slate-400 font-medium text-md">
+                    <Briefcase className="w-4 h-4 text-emerald-500/50" /> {exp.companyName} 
+                    {exp.location && <span className="text-slate-600 font-normal"> @ {exp.location}</span>}
+                  </div>
 
-                <div className="flex flex-wrap gap-2 relative z-10">
-                  {catSkills.map(skill => (
-                    <span
-                      key={skill._id}
-                      className={`text-sm tracking-wide px-3 py-1.5 rounded-lg border shadow-inner transition-all ${skill.isPrimary
-                          ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-300 font-medium hover:bg-emerald-500/20'
-                          : 'bg-white/5 border-white/10 text-slate-300 hover:bg-white/10'
-                        }`}
-                    >
-                      {skill.title}
-                    </span>
-                  ))}
+                  <div className="flex flex-wrap gap-1.5 py-1">
+                    {exp.technologies?.map(tech => (
+                      <span key={tech} className="text-[11px] font-jetbrains bg-white/[0.03] border border-white/5 text-slate-500 px-2 py-0.5 rounded uppercase">
+                        {tech}
+                      </span>
+                    ))}
+                  </div>
+
+                  <div className="prose prose-sm prose-invert max-w-none text-slate-400 font-light leading-relaxed">
+                    <PortableTextRenderer content={exp.description} />
+                  </div>
                 </div>
               </div>
             ))}
           </div>
+        </div>
 
+        {/* RIGHT COLUMN: EDUCATION (Academic Foundations) - Spans 7/12 */}
+        <div className="lg:col-span-7 space-y-12">
+          <h3 className="text-xs font-jetbrains uppercase tracking-[0.3em] text-blue-500 font-bold mb-10 flex items-center gap-3 px-2 border-l-2 border-blue-500">
+            <GraduationCap className="w-4 h-4" /> 02. Academic_Foundations
+          </h3>
+
+          <div className="space-y-12">
+            {education.map((edu, idx) => (
+              <div key={edu._id} className="relative group">
+                {/* Technical Header Bar (Education) */}
+                <div className="flex items-center justify-between mb-6 border-b border-white/5 pb-2">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[11px] font-jetbrains text-blue-400 bg-blue-500/5 px-2 py-0.5 rounded border border-blue-500/10 uppercase tracking-widest font-bold">
+                      Class of {edu.endDate ? new Date(edu.endDate).getFullYear() : "2026"}
+                    </span>
+                    <span className="text-[9px] font-jetbrains text-slate-600 uppercase tracking-tighter">
+                      // REF_ID: 0{idx + 1}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <MapPin className="w-3 h-3 text-slate-600" />
+                    <span className="text-[11px] font-jetbrains text-slate-500 uppercase tracking-widest">
+                      {edu.location || "India"}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
+                  {/* Institution Info */}
+                  <div className="md:col-span-5 space-y-4">
+                    <div className="flex items-center gap-4">
+                      {edu.institutionLogo && (
+                        <div className="relative w-12 h-12 bg-white/5 rounded-md border border-white/10 overflow-hidden shrink-0">
+                          <Image src={urlFor(edu.institutionLogo).url()} alt={edu.institution} fill className="object-cover  transition-all" />
+                        </div>
+                      )}
+                      <div>
+                        <h4 className="text-xl font-bold text-slate-100 group-hover:text-blue-400 transition-colors leading-tight">
+                          {edu.institution}
+                        </h4>
+                        <p className="text-[11px] font-jetbrains text-blue-500/70 uppercase tracking-wider mt-1">
+                          {edu.fieldOfStudy}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="bg-white/[0.02] border border-white/5 p-3 rounded-sm">
+                      <p className="text-[10px] font-jetbrains text-slate-500 uppercase mb-1">Credential</p>
+                      <p className="text-sm text-slate-300 font-medium">{edu.degree}</p>
+                    </div>
+                  </div>
+
+                  {/* Coursework & Metrics */}
+                  <div className="md:col-span-7 space-y-6">
+                    {edu.gpa && (
+                      <div className="flex items-center justify-between px-4 py-2 bg-blue-500/5 border border-blue-500/10 rounded-sm">
+                        <div className="flex items-center gap-2">
+                          <Activity className="w-3 h-3 text-blue-400" />
+                          <span className="text-[11px] font-jetbrains text-slate-400 uppercase">Performance</span>
+                        </div>
+                        <span className="text-md font-jetbrains font-bold text-blue-400">{edu.gpa}</span>
+                      </div>
+                    )}
+
+                    <div className="space-y-3">
+                      <span className="text-[11px] font-jetbrains text-slate-600 uppercase tracking-widest block">Core_Modules</span>
+                      <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+                        {edu.courses?.map((course) => (
+                          <div key={course} className="flex items-center gap-2 group/course">
+                            <div className="w-1 h-1 bg-blue-500/40 rounded-full group-hover/course:bg-blue-400" />
+                            <span className="text-[11px] font-jetbrains text-slate-500 group-hover/course:text-slate-300 transition-colors uppercase">
+                              {course}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Aesthetic Blueprint Bracket */}
+                <div className="absolute -bottom-3 -right-3 w-10 h-10 border-b border-r border-white/5 pointer-events-none group-hover:border-blue-500/20 transition-colors" />
+              </div>
+            ))}
+          </div>
         </div>
 
       </div>
