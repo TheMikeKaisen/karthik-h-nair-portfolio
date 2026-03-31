@@ -7,7 +7,7 @@ import { motion } from "framer-motion";
 import { Home, Leaf, Terminal, Activity } from "lucide-react";
 
 export default function NotFound() {
-  const [countdown, setCountdown] = useState(3);
+  const [countdown, setCountdown] = useState(2);
   const router = useRouter();
 
   useEffect(() => {
@@ -19,7 +19,7 @@ export default function NotFound() {
     // 2. Trigger the redirect after 3 seconds
     const redirect = setTimeout(() => {
       router.push("/");
-    }, 3000);
+    }, 2000);
 
     return () => {
       clearInterval(timer);
