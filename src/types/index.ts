@@ -34,3 +34,38 @@ export interface DevLog {
   slug: { current: string };
   publishedAt: string;
 }
+
+export interface Experience {
+  _id: string;
+  companyName: string;
+  role: string;
+  isCurrent: boolean;
+  startDate: string;
+  endDate?: string;
+  location?: string;
+  technologies?: string[];
+  description?: string;
+  companyLogo?: any;
+  link?: string;
+}
+
+export interface Education {
+  _id: string;
+  institution: string;
+  degree: string;
+  fieldOfStudy: string;
+  location?: string;
+  startDate: string;
+  endDate?: string;
+  gpa?: string;
+  courses?: string[];
+  institutionLogo?: any;
+}
+
+export interface Skill {
+  _id: string;
+  title: string;
+  categoryName: string;
+  isPrimary: boolean;
+  icon?: any;
+}

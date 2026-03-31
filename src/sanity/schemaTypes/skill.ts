@@ -35,10 +35,19 @@ export default defineType({
             options: { hotspot: true },
         }),
     ],
-    preview: {
-        select: {
-            title: 'title',
-            subtitle: 'category',
-        },
-    },
+    // skill.ts
+
+preview: {
+  select: {
+    title: 'title',
+    // Use dot notation to reach into the referenced 'category' document
+    categoryTitle: 'category.title', 
+  },
+  prepare({ title, categoryTitle }) {
+    return {
+      title: title,
+      subtitle: categoryTitle || 'No Category Assigned',
+    };
+  },
+},
 })

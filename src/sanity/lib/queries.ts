@@ -98,3 +98,39 @@ export const nextProjectQuery = groq`*[_type == "project" && publishedAt > $curr
   mainImage,
   description
 }`;
+
+
+export const experienceQuery = groq`*[_type == "experience"] | order(startDate desc) {
+  _id,
+  companyName,
+  role,
+  isCurrent,
+  startDate,
+  endDate,
+  location,
+  technologies,
+  description,
+  companyLogo,
+  link
+}`;
+
+export const educationQuery = groq`*[_type == "education"] | order(endDate desc) {
+  _id,
+  institution,
+  degree,
+  fieldOfStudy,
+  location,
+  startDate,
+  endDate,
+  gpa,
+  courses,
+  institutionLogo
+}`;
+
+export const skillsQuery = groq`*[_type == "skill"] | order(category->title asc, title asc) {
+  _id,
+  title,
+  "categoryName": category->title,
+  isPrimary,
+  icon
+}`;
