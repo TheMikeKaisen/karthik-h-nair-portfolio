@@ -1,19 +1,25 @@
 name: Daily Metrics Sync
 on:
   schedule:
-    - cron: '30 23 * * *' # Runs at 11:30 PM UTC every day
-  workflow_dispatch: # Allows you to run it manually for testing
+    - cron: '30 23 * * *' 
+  workflow_dispatch: 
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      # 1. Updated to v4 for Node 24 support
+      - uses: actions/checkout@v4 
+      
+      # 2. Updated to v4 and bumped to Node 24
+      - uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 24 
+
+      # 3. Added --legacy-peer-deps to bypass the Next.js 16 conflict
       - name: Install Dependencies
-        run: npm install @sanity/client @octokit/rest dotenv
+        run: npm install @sanity/client @octokit/rest dotenv --legacy-peer-deps
+
       - name: Run Sync Script
         env:
           NEXT_PUBLIC_SANITY_PROJECT_ID: ${{ secrets.SANITY_PROJECT_ID }}
