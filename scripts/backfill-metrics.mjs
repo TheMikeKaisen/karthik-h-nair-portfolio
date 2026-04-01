@@ -2,23 +2,10 @@ import { createClient } from '@sanity/client';
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import fetch from 'node-fetch';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 dotenv.config({ path: path.resolve(__dirname, '../.env.local') });
-
-// --- DEBUGGING: Check if variables are loaded ---
-console.log("--- Environment Check ---");
-console.log("Project ID:", process.env.NEXT_PUBLIC_SANITY_PROJECT_ID || "❌ MISSING");
-console.log("Sanity Token:", process.env.SANITY_WRITE_TOKEN ? "✅ LOADED" : "❌ MISSING");
-console.log("GitHub PAT:", process.env.GH_PAT ? "✅ LOADED" : "❌ MISSING");
-console.log("-------------------------\n");
-
-if (!process.env.GH_PAT || !process.env.SANITY_WRITE_TOKEN) {
-  console.error("🛑 Stopping: Missing required tokens in .env.local");
-  process.exit(1);
-}
 
 const sanity = createClient({
   projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID,
@@ -30,69 +17,64 @@ const sanity = createClient({
 
 const GH_PAT = process.env.GH_PAT;
 const USERNAME = "TheMikeKaisen";
+const LEETCODE_USERNAME = process.env.LEETCODE_USERNAME;
 
 async function backfill() {
-  console.log("--- Initializing Historical Backfill ---");
+  console.log("--- Initiating Unified History Merge ---");
 
-  const query = `
-    query($userName:String!) {
-      user(login: $userName) {
-        contributionsCollection {
-          contributionCalendar {
-            weeks {
-              contributionDays {
-                date
-                contributionCount
-              }
-            }
-          }
-        }
-      }
+  // 1. Fetch GitHub 365-day Calendar
+  const ghQuery = `query($userName:String!){user(login:$userName){contributionsCollection{contributionCalendar{weeks{contributionDays{date contributionCount}}}}}}`;
+  const ghRes = await fetch('https://api.github.com/graphql', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${GH_PAT}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ query: ghQuery, variables: { userName: USERNAME } }),
+  });
+  const ghJson = await ghRes.json();
+  const weeks = ghJson.data.user.contributionsCollection.contributionCalendar.weeks;
+
+  // 2. Fetch LeetCode Calendar
+  const lcQuery = `query userProfileCalendar($username:String!){matchedUser(username:$username){userCalendar{submissionCalendar}}}`;
+  const lcRes = await fetch('https://leetcode.com/graphql', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ query: lcQuery, variables: { username: LEETCODE_USERNAME } }),
+  });
+  const lcJson = await lcRes.json();
+  const leetcodeCalendar = JSON.parse(lcJson.data.matchedUser.userCalendar.submissionCalendar);
+
+  // 3. Map GitHub dates to a helper object
+  const historyMap = {};
+  weeks.forEach(w => w.contributionDays.forEach(d => {
+    historyMap[d.date] = { github: d.contributionCount, leetcode: 0 };
+  }));
+
+  // 4. Inject LeetCode history into that map
+  Object.keys(leetcodeCalendar).forEach(ts => {
+    const date = new Date(ts * 1000).toISOString().split('T')[0];
+    const count = leetcodeCalendar[ts];
+    if (historyMap[date]) {
+      historyMap[date].leetcode = count;
+    } else {
+      historyMap[date] = { github: 0, leetcode: count };
     }
-  `;
+  });
 
-  try {
-    const response = await fetch('https://api.github.com/graphql', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${GH_PAT}`,
-        'Content-Type': 'application/json',
-        'User-Agent': 'Portfolio-Backfill-Script'
-      },
-      body: JSON.stringify({ query, variables: { userName: USERNAME } }),
-    });
-
-    const json = await response.json();
-    
-    // If the data property is missing, the API call failed
-    if (!json.data) {
-      console.error("❌ GitHub API Error. Full response below:");
-      console.error(JSON.stringify(json, null, 2));
-      return;
+  // 5. Push to Sanity
+  for (const [date, metrics] of Object.entries(historyMap)) {
+    const total = metrics.github + metrics.leetcode;
+    if (total > 0) {
+      await sanity.createOrReplace({
+        _type: 'activityMetric',
+        _id: `metric-${date}`,
+        date: date,
+        githubCommits: metrics.github,
+        leetcodeSolved: metrics.leetcode,
+        totalActivity: total,
+      });
+      console.log(`Synced ${date}: GH[${metrics.github}] LC[${metrics.leetcode}]`);
     }
-
-    const weeks = json.data.user.contributionsCollection.contributionCalendar.weeks;
-    console.log("📦 Data retrieved. Syncing to Sanity...");
-
-    for (const week of weeks) {
-      for (const day of week.contributionDays) {
-        if (day.contributionCount > 0) {
-          await sanity.createOrReplace({
-            _type: 'activityMetric',
-            _id: `metric-${day.date}`,
-            date: day.date,
-            githubCommits: day.contributionCount,
-            totalActivity: day.contributionCount, 
-          });
-          console.log(`✅ ${day.date}: ${day.contributionCount} commits`);
-        }
-      }
-    }
-
-    console.log("\n--- Backfill Complete! ---");
-  } catch (error) {
-    console.error("❌ Execution Error:", error.message);
   }
+  console.log("--- Backfill Protocol Terminated Successfully ---");
 }
 
 backfill();

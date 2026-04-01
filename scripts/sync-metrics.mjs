@@ -1,57 +1,76 @@
 import { createClient } from '@sanity/client';
 import { Octokit } from "@octokit/rest";
 import dotenv from 'dotenv';
-dotenv.config();
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+dotenv.config({ path: path.resolve(__dirname, '../.env.local') });
 
 const sanity = createClient({
   projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID,
   dataset: process.env.NEXT_PUBLIC_SANITY_DATASET,
   useCdn: false,
-  token: process.env.SANITY_WRITE_TOKEN, // Needs Write Access
+  token: process.env.SANITY_WRITE_TOKEN,
   apiVersion: '2024-03-31',
 });
 
 const octokit = new Octokit({ auth: process.env.GH_PAT });
+const LEETCODE_USERNAME = process.env.LEETCODE_USERNAME;
+
+async function fetchLeetCodeCount(dateStr) {
+  const query = `query userProfileCalendar($username: String!) {
+    matchedUser(username: $username) { userCalendar { submissionCalendar } }
+  }`;
+  try {
+    const res = await fetch('https://leetcode.com/graphql', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query, variables: { username: LEETCODE_USERNAME } }),
+    });
+    const json = await res.json();
+    const calendar = JSON.parse(json.data.matchedUser.userCalendar.submissionCalendar);
+    const targetTs = Math.floor(new Date(dateStr).getTime() / 1000).toString();
+    return calendar[targetTs] || 0;
+  } catch (e) { return 0; }
+}
 
 async function sync() {
   const targetDate = new Date();
-  // We sync data for "Today" so it shows up in the "Yesterday" view tomorrow
+  targetDate.setDate(targetDate.getDate() - 1); // Syncing yesterday's full data
   const dateStr = targetDate.toISOString().split('T')[0];
 
-  console.log(`--- Starting Sync for ${dateStr} ---`);
+  console.log(`--- Syncing Trace for ${dateStr} ---`);
 
-  // 1. Fetch GitHub Commits
-  // Logic: Search for commits by you on this specific date
+  // GitHub Commits
   const { data } = await octokit.search.commits({
     q: `author:TheMikeKaisen merge:false author-date:${dateStr}`,
   });
   const githubCount = data.total_count || 0;
 
-  // 2. Fetch Sanity Activity (Articles + Logs)
+  // LeetCode Logic
+  const leetcodeCount = await fetchLeetCodeCount(dateStr);
+
+  // Sanity Logs/Articles
   const sanityActivity = await sanity.fetch(
     `count(*[(_type == "post" || _type == "article" || _type == "log") && _createdAt match $date])`,
     { date: `${dateStr}*` }
   );
 
-  // 3. Prepare the Document
-  const total = githubCount + sanityActivity;
+  const total = githubCount + leetcodeCount + sanityActivity;
 
-  const doc = {
+  await sanity.createOrReplace({
     _type: 'activityMetric',
-    _id: `metric-${dateStr}`, // Unique ID prevents duplicates
+    _id: `metric-${dateStr}`,
     date: dateStr,
     githubCommits: githubCount,
-    articlesPublished: sanityActivity, // Simplified for this demo
+    leetcodeSolved: leetcodeCount,
+    articlesPublished: sanityActivity,
     totalActivity: total,
-  };
+  });
 
-  // 4. Push to Sanity (Create or Replace)
-  try {
-    await sanity.createOrReplace(doc);
-    console.log(`✅ Success: Generated ${total} total activity points.`);
-  } catch (err) {
-    console.error('❌ Sanity Sync Failed:', err.message);
-  }
+  console.log(`✅ Finalized: GH(${githubCount}) + LC(${leetcodeCount}) + S(${sanityActivity}) = ${total}`);
 }
 
 sync();
