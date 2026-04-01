@@ -7,8 +7,9 @@ import { articleType } from './article'
 import experience from './experience'
 import education from './education'
 import skill from './skill'
+import activityMetric from './activityMetric'
 
 
 export const schema: { types: SchemaTypeDefinition[] } = {
-  types: [projectType, activityType, categoryType, devLogType, articleType, experience, education, skill],
+  types: [projectType, activityType, categoryType, devLogType, articleType, experience, education, skill, activityMetric],
 }

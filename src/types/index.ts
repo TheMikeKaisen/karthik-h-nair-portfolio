@@ -72,3 +72,13 @@ export interface Skill {
   isPrimary: boolean;
   icon?: any;
 }
+
+export interface ActivityMetric {
+  date: string;
+  githubCommits: number;
+  leetcodeSolved: number;
+  gfgSolved: number;
+  articlesPublished: number;
+  devLogs: number;
+  totalActivity: number;
+}

@@ -146,3 +146,14 @@ export const skillsQuery = groq`*[_type == "skill"] | order(category->title asc,
   isPrimary,
   icon
 }`;
+
+// Query to fetch activity metrics for the last year, excluding today
+export const heatmapMetricsQuery = `*[_type == "activityMetric" && date < $today && date >= $oneYearAgo] | order(date asc) {
+  date,
+  githubCommits,
+  leetcodeSolved,
+  gfgSolved,
+  articlesPublished,
+  devLogs,
+  totalActivity
+}`;
