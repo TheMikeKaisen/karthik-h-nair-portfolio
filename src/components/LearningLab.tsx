@@ -12,9 +12,9 @@ export async function LearningLab() {
   ]);
 
   return (
-    <section className="py-32 container mx-auto px-4 relative">
+    <section className="py-20 md:py-28 container mx-auto px-4 relative">
       {/* Section Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
+      <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
         <div className="space-y-3">
           <div className="flex items-center gap-2 text-blue-400 font-jetbrains text-xs tracking-[0.3em] uppercase">
             <Binary className="w-4 h-4" /> Lab_Environment_v2

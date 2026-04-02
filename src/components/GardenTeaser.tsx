@@ -9,13 +9,13 @@ export async function GardenTeaser() {
   const articles = await sanityFetch<Article[]>({ query: featuredArticlesQuery });
 
   return (
-    <section className="py-32 container mx-auto px-4 border-t border-white/5 relative overflow-hidden">
+    <section className="py-20 md:py-28 container mx-auto px-4 border-t border-white/5 relative overflow-hidden">
       {/* Decorative Blueprint Text in Background */}
       <div className="absolute -bottom-10 -left-10 opacity-[0.03] pointer-events-none select-none">
         <h2 className="text-[12rem] font-bold text-white leading-none">ARCHIVE</h2>
       </div>
 
-      <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
+      <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
         <div className="space-y-3">
           <div className="flex items-center gap-2 text-emerald-500 font-jetbrains text-xs tracking-[0.3em] uppercase">
             <Command className="w-4 h-4" /> Intellectual_Output

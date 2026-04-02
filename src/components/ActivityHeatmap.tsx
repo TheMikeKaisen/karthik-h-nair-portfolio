@@ -48,8 +48,8 @@ const getLevel = (day: ActivityMetric) => {
 ))}
 
   return (
-    <section className="py-24 container mx-auto px-4 border-t border-white/5 relative">
-      <div className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6">
+    <section className="py-16 md:py-20 container mx-auto px-4 border-t border-white/5 relative">
+      <div className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div className="space-y-2">
           <div className="flex items-center gap-2 text-emerald-500 font-jetbrains text-xs tracking-[0.3em] uppercase">
             <IconInfoCircle size={14} /> i_love_to_code

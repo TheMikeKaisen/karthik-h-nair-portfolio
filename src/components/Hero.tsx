@@ -159,7 +159,7 @@ export function Hero() {
   }
 
   return (
-    <section className="relative min-h-[95vh] flex flex-col items-center justify-center overflow-hidden bg-[#0a0a0a] pt-16">
+    <section className="relative min-h-[85vh] flex flex-col items-center justify-center overflow-hidden bg-[#0a0a0a] pt-16">
       {/* 1. Base Grid Layer */}
       <div
         className="absolute inset-0 z-0 pointer-events-none"

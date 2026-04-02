@@ -9,11 +9,11 @@ export async function SkillsMatrix() {
   const skills = await sanityFetch<Skill[]>({ query: skillsQuery });
 
   return (
-    <section className="py-24 container mx-auto px-4 bg-[#0a0a0a] relative overflow-hidden">
+    <section className="py-16 md:py-20 container mx-auto px-4 bg-[#0a0a0a] relative overflow-hidden">
       {/* Decorative Blueprint Background */}
       <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.01)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.01)_1px,transparent_1px)] bg-[size:60px_60px] pointer-events-none" />
 
-      <div className="mb-16 text-center">
+      <div className="mb-10 text-center">
         <div className="inline-flex items-center gap-2 text-emerald-500 font-jetbrains text-[10px] tracking-[0.4em] uppercase mb-4 px-3 py-1 border border-emerald-500/20 rounded-full bg-emerald-500/5">
           <Code2 className="w-3 h-3" /> Technical_Inventory
         </div>

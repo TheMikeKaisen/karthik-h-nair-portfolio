@@ -14,17 +14,56 @@ export function GlobalNavbar() {
   const pathname = usePathname();
   const [mounted, setMounted] = React.useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
+  const [isVisible, setIsVisible] = React.useState(true);
+  const [lastScrollY, setLastScrollY] = React.useState(0);
+  const [isScrolled, setIsScrolled] = React.useState(false);
 
   React.useEffect(() => {
     setMounted(true);
-  }, []);
+
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      
+      // Background blur logic with threshold
+      if (currentScrollY > 10) {
+        setIsScrolled(true);
+      } else {
+        setIsScrolled(false);
+      }
+
+      // Visibility logic with hysteresis to prevent flickering
+      if (currentScrollY < 20 || isMobileMenuOpen) {
+        // Always show near the very top or when menu is open
+        setIsVisible(true);
+      } else if (currentScrollY > lastScrollY && currentScrollY > 100) {
+        // Scrolling down and past a certain point
+        setIsVisible(false);
+      } else if (currentScrollY < lastScrollY - 5) {
+        // Scrolling up (with 5px buffer to prevent sensitivity issues)
+        setIsVisible(true);
+      }
+      
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [lastScrollY, isMobileMenuOpen]);
 
   if (pathname?.startsWith("/studio")) {
     return null;
   }
 
+  // Define transition classes - Ensure border is always defined to prevent layout shifts
+  const navTransformClass = isVisible ? "translate-y-0" : "-translate-y-full opacity-0";
+  const navBackgroundClass = isScrolled 
+    ? "bg-black/40 backdrop-blur-md border-b border-white/10 py-4 shadow-2xl" 
+    : "bg-transparent border-b border-transparent py-6";
+
   return (
-    <header className="fixed top-0 z-50 w-full pt-6">
+    <header 
+      className={`fixed top-0 left-0 right-0 z-50 w-full transition-all duration-300 ease-in-out ${navTransformClass} ${navBackgroundClass}`}
+    >
       <div className="container mx-auto px-4 flex items-center justify-between">
         
         {/* Left Side: Brand Identity */}

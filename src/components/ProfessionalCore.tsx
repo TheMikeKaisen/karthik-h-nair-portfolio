@@ -18,9 +18,9 @@ export async function ProfessionalCore() {
   };
 
   return (
-    <section className="py-24 container mx-auto px-4 border-t border-white/5 bg-[#0a0a0a] z-10 relative">
+    <section className="py-20 container mx-auto px-4 border-t border-white/5 bg-[#0a0a0a] z-10 relative">
       {/* Section Title */}
-      <div className="mb-20">
+      <div className="mb-12">
         <div className="flex items-center gap-2 text-emerald-500 font-jetbrains text-xs tracking-[0.3em] uppercase mb-4">
           <Database className="w-4 h-4" /> Making_of_an_Engineer
         </div>

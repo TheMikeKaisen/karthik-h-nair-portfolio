@@ -11,13 +11,13 @@ export async function ProjectGrid() {
   const topProjects = projects.slice(0, 4);
 
   return (
-    <section className="py-32 container mx-auto px-4 relative overflow-hidden">
+    <section className="py-20 md:py-28 container mx-auto px-4 relative overflow-hidden">
       {/* Background Decorative Element */}
       <div className="absolute top-0 right-0 -z-10 opacity-20">
         <div className="text-[15rem] font-bold text-white/5 select-none tracking-tighter">PROJECTS</div>
       </div>
 
-      <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
+      <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
         <div className="space-y-2">
           <div className="flex items-center gap-2 text-emerald-500 font-jetbrains text-xs tracking-[0.3em] uppercase">
             <Cpu className="w-4 h-4" /> System_Deployments
