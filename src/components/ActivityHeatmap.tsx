@@ -52,10 +52,10 @@ const getLevel = (day: ActivityMetric) => {
       <div className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div className="space-y-2">
           <div className="flex items-center gap-2 text-emerald-500 font-jetbrains text-xs tracking-[0.3em] uppercase">
-            <IconInfoCircle size={14} /> telemetry_data_feed
+            <IconInfoCircle size={14} /> i_love_to_code
           </div>
           <h2 className="text-4xl font-bold tracking-tight text-white">
-            Activity <span className="text-emerald-500">Heatmap</span>
+            Consistency <span className="text-emerald-500">Heatmap</span>
           </h2>
           <p className="text-slate-400 max-w-md font-light text-sm">
             A 365-day execution trace aggregating commits, logic puzzles, and documentation logs.
@@ -143,7 +143,7 @@ const getLevel = (day: ActivityMetric) => {
       <div className="mt-8 flex items-center justify-between text-[9px] font-jetbrains text-slate-700 uppercase tracking-[0.3em]">
         <span>Source: Multi_API_Aggregator</span>
         <span className="hidden md:block">Update_Cycle: 24H_DELAYED</span>
-        <span>Status: Validated_Trace</span>
+        
       </div>
     </section>
   );

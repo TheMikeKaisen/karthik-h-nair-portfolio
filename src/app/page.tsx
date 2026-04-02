@@ -15,11 +15,11 @@ export default async function HomePage() {
     <>
       <main className="min-h-screen relative">
 
-        
+
         <Hero />
         <ProjectGrid />
-        <LearningLab />
         <ActivityHeatmap data={activityData} />
+        <LearningLab />
         <GardenTeaser />
         <ProfessionalCore />
         <SkillsMatrix/>
