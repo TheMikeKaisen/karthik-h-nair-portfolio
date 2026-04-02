@@ -10,6 +10,7 @@ import {
   IconCode, 
   IconCpu 
 } from "@tabler/icons-react";
+import { handleEmailClick } from "@/lib/contact";
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
@@ -76,15 +77,15 @@ export function Footer() {
               >
                 <IconBrandLinkedin size={20} stroke={1.5} />
               </a>
-              <a 
-                href="mailto:h.karthiknair@gmail.com" 
+              <button 
+                onClick={handleEmailClick}
                 className="text-slate-500 hover:text-white transition-all p-2.5 bg-white/[0.03] border border-white/5 rounded-md hover:border-emerald-500/30" 
               >
                 <IconMail size={20} stroke={1.5} />
-              </a>
+              </button>
             </div>
 
-            <a 
+            {/* <a 
               href="https://calendly.com/placeholder" 
               target="_blank" 
               rel="noreferrer" 
@@ -92,7 +93,7 @@ export function Footer() {
             >
               <IconCalendar size={18} stroke={2} />
               Book_a_Sync
-            </a>
+            </a> */}
           </div>
         </div>
 

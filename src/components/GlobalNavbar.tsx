@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { Globe, Mail } from "lucide-react";
 import { motion } from "framer-motion";
 import { IconMail } from "@tabler/icons-react";
+import { handleEmailClick } from "@/lib/contact";
 
 const links = [
   { name: "the Garden", href: "/garden", highlight: true },
@@ -17,34 +18,6 @@ export function GlobalNavbar() {
   const [isVisible, setIsVisible] = React.useState(true);
   const [lastScrollY, setLastScrollY] = React.useState(0);
   const [isScrolled, setIsScrolled] = React.useState(false);
-
-  const handleEmailClick = () => {
-    const email = "h.karthiknair@gmail.com"; // Replace with your actual Gmail
-    const subject = encodeURIComponent("Inquiry from Portfolio");
-    const body = encodeURIComponent("Hi Karthik,\n\nI was checking out your 'Garden' and...");
-
-    // 1. The Web/Desktop URL
-    const gmailWebUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${email}&su=${subject}&body=${body}`;
-
-    // 2. The Mobile Deep Link (Specific to Gmail App)
-    const gmailAppUrl = `googlegmail:///co?to=${email}&subject=${subject}&body=${body}`;
-
-    // Detection logic
-    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-
-    if (isMobile) {
-      // Try to open the Gmail App
-      window.location.href = gmailAppUrl;
-
-      // Fallback: If they don't have the Gmail app, open in browser after a short delay
-      setTimeout(() => {
-        window.open(gmailWebUrl, "_blank");
-      }, 500);
-    } else {
-      // Desktop: Open Gmail in a new tab
-      window.open(gmailWebUrl, "_blank");
-    }
-  };
 
   React.useEffect(() => {
     setMounted(true);

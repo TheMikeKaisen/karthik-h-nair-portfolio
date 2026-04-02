@@ -27,6 +27,40 @@ interface GardenClientProps {
   logs: DevLog[];
 }
 
+// Decorative SVG Components for the Greenery Look
+const FloatingLeaf = ({ className, delay = 0, style }: { className?: string; delay?: number; style?: React.CSSProperties }) => (
+  <motion.svg
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    className={className}
+    style={style}
+    initial={{ rotate: -5, y: 0 }}
+    animate={{ 
+      rotate: [ -5, 5, -5 ],
+      y: [ 0, -3, 0 ]
+    }}
+    transition={{
+      duration: 5 + delay,
+      repeat: Infinity,
+      ease: "easeInOut",
+      delay: delay
+    }}
+  >
+    <path d="M12 2C12 2 4 6 4 13C4 20 12 22 12 22C12 22 20 20 20 13C20 6 12 2 12 2Z" fill="currentColor" fillOpacity="0.4" />
+    <path d="M12 2V22" stroke="currentColor" strokeOpacity="0.2" strokeWidth="0.5" />
+  </motion.svg>
+);
+
+const GrassBlade = ({ className, delay = 0, height = 20 }: { className?: string; delay?: number; height?: number }) => (
+  <motion.div
+    className={`w-[2.5px] bg-emerald-500/30 rounded-full origin-bottom ${className}`}
+    style={{ height: `${height}px` }}
+    animate={{ rotate: [-2, 2, -2] }}
+    transition={{ duration: 3 + delay, repeat: Infinity, ease: "easeInOut", delay }}
+  />
+);
+
 export default function GardenClient({ articles, logs }: GardenClientProps) {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -116,15 +150,43 @@ export default function GardenClient({ articles, logs }: GardenClientProps) {
 
   return (
     <div className="w-full flex flex-col gap-8">
-      {/* 1. Header Component */}
-      <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-white/10">
-        <div>
-          <h1 className="text-4xl md:text-5xl font-bold tracking-tighter text-[#f8fafc] mb-2">The Garden</h1>
-          <p className="text-slate-400 font-light">Notes, architectures, and terminal logs.</p>
+      {/* 1. Enhanced Header Component with Greenery */}
+      <header className="relative group overflow-hidden md:overflow-visible flex flex-col md:flex-row md:items-end justify-between gap-6 pb-8 border-b border-white/10">
+        
+        {/* Background Greenery Layer (Behind Text) */}
+        <div className="absolute -left-10 -top-10 w-full h-full pointer-events-none select-none z-0 opacity-40 mix-blend-screen">
+           <FloatingLeaf className="absolute left-4 top-4 w-16 h-16 text-emerald-900" delay={0.5} />
+           <FloatingLeaf className="absolute left-20 top-2 w-12 h-12 text-emerald-800" delay={1.2} />
+           <FloatingLeaf className="absolute left-32 top-8 w-20 h-20 text-emerald-950" delay={0.1} />
+           <FloatingLeaf className="absolute left-8 top-16 w-10 h-10 text-emerald-700" delay={2.4} />
+           {/* Hanging Vines Simulation */}
+           <motion.div 
+             className="absolute left-48 top-0 w-px h-32 bg-gradient-to-b from-emerald-900/0 via-emerald-800/40 to-emerald-700/0"
+             animate={{ height: [120, 140, 120] }}
+             transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+           />
+           <FloatingLeaf className="absolute left-[11.5rem] top-24 w-6 h-6 text-emerald-600" delay={1.8} />
         </div>
 
-        {/* 2. Mode Switcher (Pill UI) */}
-        <div className="bg-white/5 border border-white/10 p-1 rounded-full flex relative w-max font-jetbrains">
+        <div className="relative z-10 flex flex-col gap-1">
+          <div className="relative inline-block">
+             {/* Title with subtle glow */}
+             <h1 className="text-4xl md:text-5xl font-bold tracking-tighter text-white mb-1 relative z-20 mix-blend-plus-lighter">
+               The Garden
+               <div className="absolute -inset-2 bg-emerald-500/10 blur-2xl rounded-full -z-10" />
+             </h1>
+             {/* Roots poking from the base of the title */}
+             <svg className="absolute -bottom-4 left-0 w-32 h-8 text-emerald-900/40 -z-10" viewBox="0 0 100 20">
+               <path d="M10 0 Q 15 10 5 20 M25 0 Q 20 15 30 20 M50 0 Q 55 5 45 15 M80 0 Q 70 10 85 20" stroke="currentColor" fill="none" strokeWidth="0.5" />
+             </svg>
+          </div>
+          <p className="text-slate-400 font-normal tracking-tight max-w-xs leading-snug">
+             Notes, architectures, and terminal logs.
+          </p>
+        </div>
+
+        {/* 2. Mode Switcher (Pill UI) stays clean but elevated */}
+        <div className="relative z-10 bg-white/5 border border-white/10 p-1 rounded-full flex relative w-max font-jetbrains">
           <button
             onClick={() => setView('articles')}
             className={`relative px-5 py-2 rounded-full text-xs font-semibold z-10 transition-colors uppercase tracking-widest ${view === 'articles' ? 'text-slate-900' : 'text-slate-400 hover:text-white'}`}
@@ -152,6 +214,20 @@ export default function GardenClient({ articles, logs }: GardenClientProps) {
               />
             )}
           </button>
+        </div>
+
+        {/* Grass elements at the floor of the header */}
+        <div className="absolute bottom-0 left-0 w-full flex items-end gap-1 px-4 pointer-events-none select-none">
+           <GrassBlade height={12} delay={0.2} />
+           <GrassBlade height={18} delay={0.8} />
+           <GrassBlade height={14} delay={1.1} />
+           <GrassBlade height={22} delay={0.4} />
+           <GrassBlade height={16} delay={0.7} className="hidden sm:block" />
+           <GrassBlade height={20} delay={1.5} className="hidden sm:block" />
+           <GrassBlade height={12} delay={0.3} className="hidden md:block" />
+           <GrassBlade height={24} delay={0.9} className="hidden md:block" />
+           <GrassBlade height={14} delay={0.5} className="hidden lg:block" />
+           <GrassBlade height={26} delay={1.2} className="hidden lg:block" />
         </div>
       </header>
 
