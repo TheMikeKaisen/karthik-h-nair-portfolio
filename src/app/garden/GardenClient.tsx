@@ -1,10 +1,10 @@
 "use client"
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState, useMemo, useRef } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion, AnimatePresence, Variants } from 'framer-motion';
-import { Terminal, ArrowRight } from 'lucide-react';
+import { Terminal, ArrowRight, Search, ListFilter, X, Check, ChevronDown } from 'lucide-react';
 import Image from 'next/image';
 import { urlFor } from '@/sanity/lib/image';
 import { Article, DevLog } from '@/types';
@@ -30,7 +30,64 @@ interface GardenClientProps {
 export default function GardenClient({ articles, logs }: GardenClientProps) {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const filterRef = useRef<HTMLDivElement>(null);
   
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [tagSearchQuery, setTagSearchQuery] = useState("");
+
+  // Close filter when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (filterRef.current && !filterRef.current.contains(event.target as Node)) {
+        setIsFilterOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Derive unique tags from both content types
+  const allTags = useMemo(() => {
+    const tags = new Set<string>();
+    articles.forEach((a: Article) => a.tags?.forEach((t: string) => tags.add(t)));
+    logs.forEach((l: DevLog) => l.tags?.forEach((t: string) => tags.add(t)));
+    return Array.from(tags).sort();
+  }, [articles, logs]);
+
+  const filteredAvailableTags = useMemo(() => {
+    return allTags.filter(t => t.toLowerCase().includes(tagSearchQuery.toLowerCase()));
+  }, [allTags, tagSearchQuery]);
+
+  // Filtering Logic (OR)
+  const filteredArticles = useMemo(() => {
+    return articles.filter((a: Article) => {
+      const matchesSearch = a.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                           a.excerpt.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesTags = selectedTags.length === 0 || a.tags?.some((t: string) => selectedTags.includes(t));
+      return matchesSearch && matchesTags;
+    });
+  }, [articles, searchQuery, selectedTags]);
+
+  const filteredLogs = useMemo(() => {
+    return logs.filter((l: DevLog) => {
+      const matchesSearch = l.title.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesTags = selectedTags.length === 0 || l.tags?.some((t: string) => selectedTags.includes(t));
+      return matchesSearch && matchesTags;
+    });
+  }, [logs, searchQuery, selectedTags]);
+
+  const toggleTag = (tag: string) => {
+    setSelectedTags(prev => 
+      prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]
+    );
+  };
+
+  const removeTag = (tag: string) => {
+    setSelectedTags(prev => prev.filter(t => t !== tag));
+  };
+
   // Strict URL Parameter Validation
   const rawView = searchParams.get('v');
   const view = rawView === 'logs' ? 'logs' : 'articles';
@@ -40,14 +97,14 @@ export default function GardenClient({ articles, logs }: GardenClientProps) {
   };
 
   useEffect(() => {
-  const handlePageShow = (e: PageTransitionEvent) => {
-    if (e.persisted) {
-      router.refresh();
-    }
-  };
-  window.addEventListener("pageshow", handlePageShow);
-  return () => window.removeEventListener("pageshow", handlePageShow);
-}, [router]);
+    const handlePageShow = (e: PageTransitionEvent) => {
+      if (e.persisted) {
+        router.refresh();
+      }
+    };
+    window.addEventListener("pageshow", handlePageShow);
+    return () => window.removeEventListener("pageshow", handlePageShow);
+  }, [router]);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -58,12 +115,12 @@ export default function GardenClient({ articles, logs }: GardenClientProps) {
   };
 
   return (
-    <div className="w-full flex flex-col gap-12">
+    <div className="w-full flex flex-col gap-8">
       {/* 1. Header Component */}
       <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-white/10">
         <div>
           <h1 className="text-4xl md:text-5xl font-bold tracking-tighter text-[#f8fafc] mb-2">The Garden</h1>
-          <p className="text-slate-400">Notes, architectures, and terminal logs.</p>
+          <p className="text-slate-400 font-light">Notes, architectures, and terminal logs.</p>
         </div>
 
         {/* 2. Mode Switcher (Pill UI) */}
@@ -98,8 +155,140 @@ export default function GardenClient({ articles, logs }: GardenClientProps) {
         </div>
       </header>
 
+      {/* 2. Search & Filtering Controls */}
+      <div className="flex flex-col gap-4">
+        {/* Top Row: Search bar and Filter Button */}
+        <div className="flex items-center gap-3 w-full max-w-2xl relative" ref={filterRef}>
+          {/* Main Search Bar */}
+          <div className="relative group flex-grow">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 group-focus-within:text-emerald-400 transition-colors" />
+            <input 
+              type="text" 
+              placeholder={`Search ${view === 'articles' ? 'articles' : 'logs'}...`}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-sm text-slate-200 placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 focus:bg-white/[0.08] transition-all"
+            />
+            {searchQuery && (
+              <button 
+                onClick={() => setSearchQuery("")}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
+          </div>
+
+          {/* Filter Button */}
+          <div className="relative">
+             <button 
+               onClick={() => setIsFilterOpen(!isFilterOpen)}
+               className={`flex items-center gap-2 px-5 py-3 rounded-xl border transition-all text-sm font-medium whitespace-nowrap ${isFilterOpen || selectedTags.length > 0 ? 'bg-emerald-500/10 border-emerald-500/50 text-emerald-400' : 'bg-white/5 border-white/10 text-slate-400 hover:border-white/20 hover:bg-white/[0.08]'}`}
+             >
+               <ListFilter className="w-4 h-4" />
+               <span className="hidden sm:inline">Filter by Tags</span>
+               {selectedTags.length > 0 && (
+                 <span className="bg-emerald-500 text-slate-900 w-5 h-5 flex items-center justify-center rounded-full text-[10px] font-bold">
+                   {selectedTags.length}
+                 </span>
+               )}
+               <ChevronDown className={`w-4 h-4 transition-transform duration-300 ${isFilterOpen ? 'rotate-180' : ''}`} />
+             </button>
+
+             {/* Filter Dropdown Popover */}
+             <AnimatePresence>
+               {isFilterOpen && (
+                 <motion.div 
+                   initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                   animate={{ opacity: 1, y: 0, scale: 1 }}
+                   exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                   className="absolute right-0 top-full mt-3 w-72 bg-[#0a0a0b]/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl z-[60] overflow-hidden"
+                 >
+                   <div className="p-4 border-b border-white/5">
+                      <div className="relative group">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500 group-focus-within:text-emerald-400" />
+                        <input 
+                          type="text" 
+                          placeholder="Search tags..."
+                          value={tagSearchQuery}
+                          onChange={(e) => setTagSearchQuery(e.target.value)}
+                          className="w-full bg-white/5 border border-white/5 rounded-lg py-2 pl-9 pr-3 text-xs text-slate-200 placeholder:text-slate-600 focus:outline-none focus:ring-1 focus:ring-white/10 transition-all"
+                        />
+                      </div>
+                   </div>
+                   
+                   <div className="max-h-60 overflow-y-auto p-2 scrollbar-thin scrollbar-thumb-white/10">
+                      {filteredAvailableTags.length > 0 ? (
+                        <div className="grid grid-cols-1 gap-1">
+                           {filteredAvailableTags.map((tag) => (
+                             <button
+                               key={tag}
+                               onClick={() => toggleTag(tag)}
+                               className="flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition-colors hover:bg-white/5 text-slate-400 hover:text-slate-200 group"
+                             >
+                                <div className="flex items-center gap-3">
+                                   <div className={`w-4 h-4 rounded border transition-colors flex items-center justify-center ${selectedTags.includes(tag) ? 'bg-emerald-500 border-emerald-500' : 'border-white/20 group-hover:border-white/40'}`}>
+                                      {selectedTags.includes(tag) && <Check className="w-3 h-3 text-slate-900 stroke-[3]" />}
+                                   </div>
+                                   <span>#{tag}</span>
+                                </div>
+                             </button>
+                           ))}
+                        </div>
+                      ) : (
+                        <div className="py-8 text-center text-slate-600 text-[10px] uppercase tracking-widest font-jetbrains">No matching nodes</div>
+                      )}
+                   </div>
+
+                   {selectedTags.length > 0 && (
+                     <div className="p-3 bg-white/[0.02] border-t border-white/5 flex items-center justify-between">
+                        <span className="text-[10px] text-slate-500 font-jetbrains uppercase tracking-widest">{selectedTags.length} selected</span>
+                        <button 
+                          onClick={() => setSelectedTags([])}
+                          className="text-[10px] text-emerald-400 hover:text-white uppercase font-jetbrains font-bold transition-colors"
+                        >
+                          Clear_All
+                        </button>
+                     </div>
+                   )}
+                 </motion.div>
+               )}
+             </AnimatePresence>
+          </div>
+        </div>
+
+        {/* Bottom Row: Selected Tags Chips */}
+        <AnimatePresence>
+           {selectedTags.length > 0 && (
+             <motion.div 
+               initial={{ opacity: 0, y: -10 }}
+               animate={{ opacity: 1, y: 0 }}
+               exit={{ opacity: 0, y: -10 }}
+               className="flex flex-wrap gap-2 items-center"
+             >
+                <div className="text-[10px] uppercase font-jetbrains tracking-widest text-slate-600 mr-2">Active_Filters:</div>
+                {selectedTags.map(tag => (
+                   <motion.div 
+                     key={tag}
+                     layoutId={`chip-${tag}`}
+                     className="flex items-center gap-2 pl-3 pr-2 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-medium"
+                   >
+                     <span>#{tag}</span>
+                     <button 
+                       onClick={() => removeTag(tag)}
+                       className="p-0.5 hover:bg-emerald-500/20 rounded-full transition-colors"
+                     >
+                       <X className="w-3 h-3" />
+                     </button>
+                   </motion.div>
+                ))}
+             </motion.div>
+           )}
+        </AnimatePresence>
+      </div>
+
       {/* 3. Content Area */}
-      <main className="min-h-[50vh]">
+      <main className="min-h-[50vh] mt-4">
         <AnimatePresence mode="wait">
           {view === 'articles' ? (
             <motion.div
@@ -110,7 +299,7 @@ export default function GardenClient({ articles, logs }: GardenClientProps) {
               exit={{ opacity: 0, y: -10, filter: "blur(4px)", transition: { duration: 0.2 } }}
               className="flex flex-col gap-10"
             >
-              {articles.map((article) => (
+              {filteredArticles.map((article) => (
                 <Link key={article._id} href={`/garden/${article.slug.current}?v=articles`}>
                   <motion.article variants={itemVariants} className="group cursor-pointer">
                     {article.mainImage && (
@@ -132,15 +321,28 @@ export default function GardenClient({ articles, logs }: GardenClientProps) {
                       )}
                     </div>
                     <h2 className="text-2xl md:text-3xl font-bold text-slate-200 mb-3 group-hover:text-blue-400 transition-colors tracking-tight">{article.title}</h2>
-                    <p className="text-slate-400 text-base md:text-lg font-light leading-relaxed max-w-2xl mb-4">{article.excerpt}</p>
+                    <p className="text-slate-400 text-base md:text-lg font-light leading-relaxed max-w-2xl mb-4 line-clamp-2">{article.excerpt}</p>
+                    
+                    {/* Render Tags if any */}
+                    {article.tags && article.tags.length > 0 && (
+                      <div className="flex flex-wrap gap-2 mb-4">
+                        {article.tags.map(t => (
+                          <span key={t} className="text-[10px] font-jetbrains text-slate-500">#{t}</span>
+                        ))}
+                      </div>
+                    )}
+
                     <div className="flex items-center gap-2 text-sm font-jetbrains font-semibold text-emerald-400 group-hover:text-emerald-300 transition-colors">
                       Read_More <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                     </div>
                   </motion.article>
                 </Link>
               ))}
-              {articles.length === 0 && (
-                <div className="text-slate-500 font-jetbrains text-sm">No articles published yet.</div>
+              {filteredArticles.length === 0 && (
+                <div className="flex flex-col items-center py-20 text-center">
+                   <p className="text-slate-500 font-jetbrains text-sm mb-2">No binary matches found in local garden index.</p>
+                   <button onClick={() => {setSearchQuery(""); setSelectedTags([])}} className="text-emerald-400 text-xs font-jetbrains uppercase hover:underline underline-offset-4">Reset_Filter</button>
+                </div>
               )}
             </motion.div>
           ) : (
@@ -152,23 +354,35 @@ export default function GardenClient({ articles, logs }: GardenClientProps) {
               exit={{ opacity: 0, y: -10, filter: "blur(4px)", transition: { duration: 0.2 } }}
               className="flex flex-col gap-3 font-jetbrains"
             >
-              {logs.map((log) => (
+              {filteredLogs.map((log) => (
                 <Link key={log._id} href={`/garden/${log.slug.current}?v=logs`} className="group md:w-3/4">
                   <motion.div variants={itemVariants} className="flex gap-4 p-4 rounded-lg bg-black/40 border border-white/5 hover:border-white/10 hover:bg-white/5 transition-colors cursor-pointer">
                     <div className="flex-shrink-0 mt-0.5">
                       <Terminal className="w-4 h-4 text-slate-600 group-hover:text-emerald-400 transition-colors" />
                     </div>
                     <div className="flex flex-col gap-1 w-full relative">
-                      <span className="text-[10px] text-slate-500 uppercase tracking-widest">
-                        {new Date(log.publishedAt).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' })}
-                      </span>
+                      <div className="flex items-center justify-between">
+                         <span className="text-[10px] text-slate-500 uppercase tracking-widest">
+                           {new Date(log.publishedAt).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' })}
+                         </span>
+                         {log.tags && log.tags.length > 0 && (
+                           <div className="flex gap-2">
+                             {log.tags.map(t => (
+                               <span key={t} className="text-[9px] text-slate-600">#{t}</span>
+                             ))}
+                           </div>
+                         )}
+                      </div>
                       <p className="text-sm text-slate-300 leading-relaxed font-light">{log.title}</p>
                     </div>
                   </motion.div>
                 </Link>
               ))}
-              {logs.length === 0 && (
-                <div className="text-slate-500 text-sm">No system logs executed sequence.</div>
+              {filteredLogs.length === 0 && (
+                <div className="flex flex-col items-center py-20 text-center">
+                  <p className="text-slate-500 text-sm mb-2">Null execution trace. Sequence terminated.</p>
+                  <button onClick={() => {setSearchQuery(""); setSelectedTags([])}} className="text-emerald-400 text-xs uppercase hover:underline underline-offset-4">Reset_Filter</button>
+                </div>
               )}
             </motion.div>
           )}

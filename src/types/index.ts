@@ -29,6 +29,7 @@ export interface Article {
   publishedAt: string;
   difficultyLevel?: string;
   categoryName?: string;
+  tags?: string[];
 }
 
 export interface DevLog {
@@ -36,6 +37,7 @@ export interface DevLog {
   title: string;
   slug: { current: string };
   publishedAt: string;
+  tags?: string[];
 }
 
 export interface Experience {

@@ -21,12 +21,13 @@ export function GlobalNavbar() {
   const handleEmailClick = () => {
     const email = "h.karthiknair@gmail.com"; // Replace with your actual Gmail
     const subject = encodeURIComponent("Inquiry from Portfolio");
+    const body = encodeURIComponent("Hi Karthik,\n\nI was checking out your 'Garden' and...");
 
     // 1. The Web/Desktop URL
-    const gmailWebUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${email}&su=${subject}`;
+    const gmailWebUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${email}&su=${subject}&body=${body}`;
 
     // 2. The Mobile Deep Link (Specific to Gmail App)
-    const gmailAppUrl = `googlegmail:///co?to=${email}&subject=${subject}`;
+    const gmailAppUrl = `googlegmail:///co?to=${email}&subject=${subject}&body=${body}`;
 
     // Detection logic
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
@@ -87,7 +88,10 @@ export function GlobalNavbar() {
     ? "bg-black/40 backdrop-blur-md border-b border-white/10 py-4 shadow-2xl"
     : "bg-transparent border-b border-transparent py-6";
 
-  const gardenLink = links[0];
+  const isGardenPage = pathname?.startsWith("/garden");
+  const navAction = isGardenPage 
+    ? { name: "Back Home", href: "/", label: "Home" } 
+    : { name: "the Garden", href: "/garden", label: "The Garden" };
 
   return (
     <header
@@ -108,26 +112,15 @@ export function GlobalNavbar() {
 
           {/* Text Links (Pill Enclosures) */}
           <div className="flex items-center gap-2">
-            {links.map((link) => (
-              <Link
-                key={link.name}
-                href={link.href}
-                className={`text-sm font-medium px-5 py-2 rounded-full transition-all ${link.highlight
-                  ? 'text-emerald-400 border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 shadow-[0_0_15px_rgba(52,211,153,0.15)]'
-                  : 'text-slate-300 hover:text-white border border-transparent hover:border-white/10 hover:bg-white/5'
-                  }`}
-              >
-                {link.name}
-              </Link>
-            ))}
+            <Link
+              href={navAction.href}
+              className="text-sm font-medium px-5 py-2 rounded-full transition-all text-emerald-400 border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 shadow-[0_0_15px_rgba(52,211,153,0.15)]"
+            >
+              {navAction.name}
+            </Link>
           </div>
 
           {/* Social / Action Icons (Circular Pills) */}
-          {/* <div className="flex items-center gap-2 ml-4">
-            <Link href="mailto:h.karthiknair@gmail.com" className="p-2.5 rounded-full border border-transparent hover:border-white/10 hover:bg-white/5 text-slate-300 hover:text-white transition-all">
-              <Mail className="w-4 h-4" />
-            </Link>
-          </div> */}
           <button
             onClick={handleEmailClick}
             className="flex items-center gap-2 px-4 py-2 text-xs font-jetbrains uppercase tracking-widest  rounded-md hover:bg-emerald-500/10 transition-all group"
@@ -140,10 +133,10 @@ export function GlobalNavbar() {
         {/* Mobile Action Button (Replaced Hamburger) */}
         <div className="md:hidden flex items-center gap-3">
           <Link
-            href={gardenLink.href}
+            href={navAction.href}
             className="text-[11px] font-bold uppercase tracking-widest text-emerald-400 border border-emerald-500/30 bg-emerald-500/10 px-4 py-2 rounded-full shadow-[0_0_15px_rgba(52,211,153,0.1)]"
           >
-            The Garden
+            {navAction.label}
           </Link>
         </div>
 

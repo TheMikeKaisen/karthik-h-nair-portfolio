@@ -62,6 +62,7 @@ export const publishedArticlesQuery = groq`*[_type == "article" && isPublished =
   excerpt,
   publishedAt,
   difficultyLevel,
+  tags,
   "categoryName": category->title
 }`;
 
@@ -70,6 +71,7 @@ export const devLogsQuery = groq`*[_type == "devLog"] | order(publishedAt desc) 
   _id,
   title,
   slug,
+  tags,
   publishedAt
 }`;
 
@@ -83,6 +85,7 @@ export const postBySlugQuery = groq`*[( _type == "article" || _type == "devLog" 
   mainImage,
   difficultyLevel,
   isPremium,
+  tags,
   "categoryName": category->title,
   "relatedProject": relatedProject->{title, slug}
 }`;
