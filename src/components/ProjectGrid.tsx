@@ -30,12 +30,12 @@ export async function ProjectGrid() {
           </p>
         </div>
         
-        <Link 
+        {/* <Link 
           href="/projects" 
           className="group flex items-center gap-4 px-6 py-3 bg-white/5 border border-white/10 rounded-full hover:bg-emerald-500 hover:text-black transition-all duration-300 font-jetbrains text-xs uppercase tracking-widest"
         >
           View_All_Modules <ArrowUpRight className="w-4 h-4 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
-        </Link>
+        </Link> */}
       </div>
 
       {/* The Grid */}
