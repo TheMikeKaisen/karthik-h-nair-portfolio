@@ -2,13 +2,20 @@ import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import { sanityFetch } from '@/sanity/lib/client';
-import { postBySlugQuery } from '@/sanity/lib/queries';
+import { postBySlugQuery, allPostSlugsQuery } from '@/sanity/lib/queries';
 import { urlFor } from '@/sanity/lib/image';
 import { PortableTextRenderer } from '@/components/PortableTextRenderer';
 import BackToGardenButton from './BackToGardenButton';
 
 type Props = {
   params: Promise<{ slug: string }>
+}
+
+export async function generateStaticParams() {
+  const slugs = await sanityFetch<string[]>({ query: allPostSlugsQuery, revalidate: 3600 });
+  return slugs.map((slug) => ({
+    slug,
+  }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

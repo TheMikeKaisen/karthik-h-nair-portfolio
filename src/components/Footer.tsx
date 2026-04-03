@@ -1,6 +1,8 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
+// ... (rest of icon imports)
 import { 
   IconBrandGithub, 
   IconBrandX, 
@@ -13,7 +15,11 @@ import {
 import { handleEmailClick } from "@/lib/contact";
 
 export function Footer() {
-  const currentYear = new Date().getFullYear();
+  const [currentYear, setCurrentYear] = useState(2026);
+
+  useEffect(() => {
+    setCurrentYear(new Date().getFullYear());
+  }, []);
 
   return (
     <footer className="border-t border-white/5 bg-[#0a0a0a] py-16 md:py-24 relative z-10 overflow-hidden">

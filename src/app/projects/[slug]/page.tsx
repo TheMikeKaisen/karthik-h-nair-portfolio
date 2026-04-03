@@ -4,12 +4,19 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowLeft, ArrowRight, Code2, ExternalLink, Activity } from 'lucide-react';
 import { sanityFetch } from '@/sanity/lib/client';
-import { projectBySlugQuery, nextProjectQuery } from '@/sanity/lib/queries';
+import { projectBySlugQuery, nextProjectQuery, allProjectSlugsQuery } from '@/sanity/lib/queries';
 import { urlFor } from '@/sanity/lib/image';
 import { PortableTextRenderer } from '@/components/PortableTextRenderer';
 
 type Props = {
   params: Promise<{ slug: string }>
+}
+
+export async function generateStaticParams() {
+  const slugs = await sanityFetch<string[]>({ query: allProjectSlugsQuery, revalidate: 3600 });
+  return slugs.map((slug) => ({
+    slug,
+  }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

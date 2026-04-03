@@ -160,3 +160,9 @@ export const heatmapMetricsQuery = `*[_type == "activityMetric" && date < $today
   devLogs,
   totalActivity
 }`;
+
+// Query to fetch all dynamic post slugs for static generation
+export const allPostSlugsQuery = groq`*[_type in ["article", "devLog"] && defined(slug.current)][].slug.current`;
+
+// Query to fetch all project slugs for static generation
+export const allProjectSlugsQuery = groq`*[_type == "project" && defined(slug.current)][].slug.current`;
