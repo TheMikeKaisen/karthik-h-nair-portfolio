@@ -8,10 +8,6 @@ import { motion } from "framer-motion";
 import { IconMail } from "@tabler/icons-react";
 import { handleEmailClick } from "@/lib/contact";
 
-const links = [
-  { name: "the Garden", href: "/garden", highlight: true },
-];
-
 export function GlobalNavbar() {
   const pathname = usePathname();
   const [mounted, setMounted] = React.useState(false);
@@ -64,7 +60,7 @@ export function GlobalNavbar() {
   const isGardenPage = pathname?.startsWith("/garden");
   const navAction = isGardenPage 
     ? { name: "Back Home", href: "/", label: "Home" } 
-    : { name: "the Garden", href: "/garden", label: "The Garden" };
+    : { name: "The Garden", href: "/garden", label: "The Garden" };
 
   return (
     <header
