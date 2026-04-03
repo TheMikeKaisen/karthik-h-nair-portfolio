@@ -23,7 +23,7 @@ const jetbrainsMono = JetBrains_Mono({
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://karthik-h-nair.vercel.app/"),
-  title: "Karthik Haji | Systems & Backend Engineer",
+  title: "Karthik Nair | Systems & Backend Engineer",
   description:
     "A living portfolio of scalable backend systems, technical deep dives, dev logs, and engineering journeys built in public.",
   openGraph: {
