@@ -8,8 +8,14 @@ import { PortableTextRenderer } from "@/components/PortableTextRenderer";
 
 export async function ProfessionalCore() {
   const [experience, education] = await Promise.all([
-    sanityFetch<Experience[]>({ query: experienceQuery }),
-    sanityFetch<Education[]>({ query: educationQuery }),
+    sanityFetch<Experience[]>({ 
+      query: experienceQuery,
+      tags: ["professional-core"]
+    }),
+    sanityFetch<Education[]>({ 
+      query: educationQuery,
+      tags: ["professional-core"]
+    }),
   ]);
 
   const formatDate = (dateString?: string) => {

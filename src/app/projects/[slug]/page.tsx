@@ -45,14 +45,19 @@ const StatusDot = ({ status }: { status: string }) => {
 
 export default async function ProjectCaseStudyPage({ params }: Props) {
   const { slug } = await params;
-  const project = await sanityFetch<any>({ query: projectBySlugQuery, params: { slug } });
+  const project = await sanityFetch<any>({ 
+    query: projectBySlugQuery, 
+    params: { slug },
+    tags: ["projects"]
+  });
   
   if (!project) notFound();
 
   // Conditionally fetch next project based on current project's chronological publish date
   const nextProject = await sanityFetch<any>({ 
     query: nextProjectQuery, 
-    params: { currentPublishedAt: project.publishedAt } 
+    params: { currentPublishedAt: project.publishedAt },
+    tags: ["projects"]
   });
 
   return (

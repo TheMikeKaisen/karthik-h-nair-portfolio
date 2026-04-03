@@ -7,7 +7,10 @@ import { ArrowUpRight, Cpu } from "lucide-react";
 import ProjectCard from "./ProjectCard"; // Import our new Client Component
 
 export async function ProjectGrid() {
-  const projects = await sanityFetch<Project[]>({ query: featuredProjectsQuery });
+  const projects = await sanityFetch<Project[]>({ 
+    query: featuredProjectsQuery,
+    tags: ["projects"]
+  });
   const topProjects = projects.slice(0, 4);
 
   return (

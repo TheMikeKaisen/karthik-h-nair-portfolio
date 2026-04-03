@@ -13,15 +13,18 @@ export const client = createClient({
 export async function sanityFetch<QueryResponse>({
   query,
   params = {},
-  revalidate = 3600, // Set to 0 so i can fetch fresh data during development
+  revalidate = 3600,
+  tags = [],
 }: {
   query: string
   params?: any
   revalidate?: number
+  tags?: string[]
 }): Promise<QueryResponse> {
   return client.fetch<QueryResponse>(query, params, {
     next: {
-      revalidate, // availability over consistency
+      revalidate,
+      tags,
     },
   })
 }

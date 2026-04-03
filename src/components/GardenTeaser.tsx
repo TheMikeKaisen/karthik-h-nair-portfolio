@@ -6,7 +6,10 @@ import { ArrowRight, Leaf, Command } from "lucide-react";
 import GardenCard from "./GardenCard";
 
 export async function GardenTeaser() {
-  const articles = await sanityFetch<Article[]>({ query: featuredArticlesQuery });
+  const articles = await sanityFetch<Article[]>({ 
+    query: featuredArticlesQuery,
+    tags: ["garden"]
+  });
 
   return (
     <section className="py-20 md:py-28 container mx-auto px-4 border-t border-white/5 relative overflow-hidden">

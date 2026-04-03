@@ -35,7 +35,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function GardenDetailPage({ params }: Props) {
   const { slug } = await params;
-  const post = await sanityFetch<any>({ query: postBySlugQuery, params: { slug } });
+  const post = await sanityFetch<any>({ 
+    query: postBySlugQuery, 
+    params: { slug },
+    tags: ["garden"] 
+  });
   
   if (!post) notFound();
 

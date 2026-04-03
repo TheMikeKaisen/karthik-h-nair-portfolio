@@ -12,8 +12,14 @@ export const metadata: Metadata = {
 
 export default async function GardenPage() {
   const [articles, logs] = await Promise.all([
-    sanityFetch<Article[]>({ query: publishedArticlesQuery }),
-    sanityFetch<DevLog[]>({ query: devLogsQuery })
+    sanityFetch<Article[]>({ 
+      query: publishedArticlesQuery,
+      tags: ["garden"]
+    }),
+    sanityFetch<DevLog[]>({ 
+      query: devLogsQuery,
+      tags: ["garden"]
+    })
   ]);
 
   return (

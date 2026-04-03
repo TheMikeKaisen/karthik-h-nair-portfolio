@@ -6,7 +6,10 @@ import { urlFor } from "@/sanity/lib/image";
 import Image from "next/image";
 
 export async function SkillsMatrix() {
-  const skills = await sanityFetch<Skill[]>({ query: skillsQuery });
+  const skills = await sanityFetch<Skill[]>({ 
+    query: skillsQuery,
+    tags: ["professional-core"]
+  });
 
   return (
     <section className="py-16 md:py-20 container mx-auto px-4 bg-[#0a0a0a] relative overflow-hidden">
