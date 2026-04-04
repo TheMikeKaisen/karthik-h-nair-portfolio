@@ -9,7 +9,9 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@octokit/rest": "^22.0.1",
     "@portabletext/react": "^6.0.3",
+    "@sanity/client": "^7.20.0",
     "@sanity/code-input": "^7.0.12",
     "@sanity/image-url": "^1.2.0",
     "@sanity/vision": "^4.22.0",
@@ -17,6 +19,7 @@
     "@types/react-syntax-highlighter": "^15.5.13",
     "@vercel/analytics": "^2.0.1",
     "clsx": "^2.1.1",
+    "dotenv": "^17.4.0",
     "framer-motion": "^12.38.0",
     "lucide-react": "^1.7.0",
     "next": "16.2.1",

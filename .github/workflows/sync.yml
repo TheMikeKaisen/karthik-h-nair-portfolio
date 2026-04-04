@@ -1,7 +1,7 @@
 name: Daily Metrics Sync
 on:
   schedule:
-    - cron: '30 23 * * *' 
+    - cron: '0 */6 * * *' 
   workflow_dispatch: 
 
 jobs:

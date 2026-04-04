@@ -36,25 +36,26 @@ async function fetchLeetCodeCount(dateStr) {
   } catch (e) { return 0; }
 }
 
-async function sync() {
-  const targetDate = new Date();
-  targetDate.setDate(targetDate.getDate() - 1); // Syncing yesterday's full data
-  const dateStr = targetDate.toISOString().split('T')[0];
-
+async function syncDate(dateStr) {
   console.log(`--- Syncing Trace for ${dateStr} ---`);
 
-  // GitHub Commits
-  const { data } = await octokit.search.commits({
-    q: `author:TheMikeKaisen merge:false author-date:${dateStr}`,
-  });
-  const githubCount = data.total_count || 0;
+  // GitHub Activities (Commits, PRs, Issues)
+  const [commits, prs, issues] = await Promise.all([
+    octokit.search.commits({ q: `author:TheMikeKaisen author-date:${dateStr}` }),
+    octokit.search.issuesAndPullRequests({ q: `author:TheMikeKaisen type:pr created:${dateStr}` }),
+    octokit.search.issuesAndPullRequests({ q: `author:TheMikeKaisen type:issue created:${dateStr}` }),
+  ]);
+
+  const githubCount = (commits.data.total_count || 0) + 
+                     (prs.data.total_count || 0) + 
+                     (issues.data.total_count || 0);
 
   // LeetCode Logic
   const leetcodeCount = await fetchLeetCodeCount(dateStr);
 
-  // Sanity Logs/Articles
+  // Sanity Logs/Articles (Excluding drafts)
   const sanityActivity = await sanity.fetch(
-    `count(*[(_type == "post" || _type == "article" || _type == "log") && _createdAt match $date])`,
+    `count(*[!(_id in drafts.**) && (_type == "article" || _type == "devLog") && _createdAt match $date])`,
     { date: `${dateStr}*` }
   );
 
@@ -73,4 +74,22 @@ async function sync() {
   console.log(`✅ Finalized: GH(${githubCount}) + LC(${leetcodeCount}) + S(${sanityActivity}) = ${total}`);
 }
 
-sync();
+async function runSync() {
+  const { data: user } = await octokit.users.getAuthenticated();
+  console.log(`Authenticated as: ${user.login}`);
+
+  const today = new Date();
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+
+  const dates = [
+    yesterday.toISOString().split('T')[0],
+    today.toISOString().split('T')[0]
+  ];
+
+  for (const date of dates) {
+    await syncDate(date);
+  }
+}
+
+runSync();
