@@ -53,13 +53,37 @@ async function syncDate(dateStr) {
   // LeetCode Logic
   const leetcodeCount = await fetchLeetCodeCount(dateStr);
 
-  // Sanity Logs/Articles (Excluding drafts)
-  const sanityActivity = await sanity.fetch(
-    `count(*[!( _id in path("drafts.**") ) && (_type == "article" || _type == "devLog") && _createdAt match $date])`,
-    { date: `${dateStr}*` }
-  );
+  // Separate counts for Articles and Dev Logs
+  // const [articleCount, devLogCount] = await Promise.all([
+  //   sanity.fetch(
+  //     `count(*[!( _id in path("drafts.**") ) && _type == "article" && publishedAt match $today])`,
+  //     { today: `${dateStr}*` }
+  //   ),
+  //   sanity.fetch(
+  //     `count(*[!( _id in path("drafts.**") ) && _type == "devLog" && publishedAt match $today])`,
+  //     { today: `${dateStr}*` }
+  //   )
+  // ]);
 
-  const total = githubCount + leetcodeCount + sanityActivity;
+  // Using string::startsWith is much more reliable for YYYY-MM-DD formats
+  const [articleCount, devLogCount] = await Promise.all([
+    sanity.fetch(
+      `count(*[_type == "article" && !(_id in path("drafts.**")) && publishedAt >= $start && publishedAt < $end])`,
+      {
+        start: `${dateStr}T00:00:00Z`,
+        end: `${dateStr}T23:59:59Z`
+      }
+    ),
+    sanity.fetch(
+      `count(*[_type == "devLog" && !(_id in path("drafts.**")) && publishedAt >= $start && publishedAt < $end])`,
+      {
+        start: `${dateStr}T00:00:00Z`,
+        end: `${dateStr}T23:59:59Z`
+      }
+    )
+  ]);
+
+  const total = githubCount + leetcodeCount + articleCount + devLogCount;
 
   await sanity.createOrReplace({
     _type: 'activityMetric',
@@ -67,11 +91,24 @@ async function syncDate(dateStr) {
     date: dateStr,
     githubCommits: githubCount,
     leetcodeSolved: leetcodeCount,
-    articlesPublished: sanityActivity,
+    articlesPublished: articleCount,
+    devLogs: devLogCount,
     totalActivity: total,
   });
 
-  console.log(`✅ Finalized: GH(${githubCount}) + LC(${leetcodeCount}) + S(${sanityActivity}) = ${total}`);
+  console.log(`✅ Finalized: GH(${githubCount}) + LC(${leetcodeCount}) + A(${articleCount}) + D(${devLogCount}) = ${total}`);
+  const debugDocs = await sanity.fetch(
+    `*[_type in ["article", "devLog"] && !(_id in path("drafts.**")) && publishedAt >= $start && publishedAt < $end]{ _id, _type, title, publishedAt }`,
+    {
+      start: `${dateStr}T00:00:00Z`,
+      end:   `${dateStr}T23:59:59Z`,
+    }
+  );
+
+  console.log("🔍 Documents found in Sanity for this date:");
+  debugDocs.forEach(doc => {
+    console.log(`- [${doc._type}] ID: ${doc._id} | Title: ${doc.title} | Date: ${doc.publishedAt}`);
+  });
 }
 
 async function runSync() {
