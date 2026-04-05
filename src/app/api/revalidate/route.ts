@@ -31,8 +31,8 @@ export async function POST(req: NextRequest) {
       tags.push('projects');
     }
 
-    if (body._type === 'experience' || body._type === 'education' || body._type === 'skill' || body._type === 'activity') {
-      tags.push('professional-core');
+    if (body._type === 'experience' || body._type === 'education' || body._type === 'skill' || body._type === 'activity' || body._type === 'activityMetric') {
+      tags.push(body._type === 'activityMetric' ? 'heatmap' : 'professional-core');
     }
 
     // Always revalidate the 'all' tag if you want a global fallback

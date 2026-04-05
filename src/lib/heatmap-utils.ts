@@ -12,7 +12,9 @@ export async function getHeatmapData() {
   // sanityFetch now knows exactly what shape of data to expect
   const rawData = await sanityFetch<ActivityMetric[]>({ 
     query: heatmapMetricsQuery,
-    params: { today, oneYearAgo }
+    params: { today, oneYearAgo },
+    tags: ['heatmap'], // This allows on-demand revalidation when the sync script runs
+    revalidate: 600   // Cache for 10 minutes instead of an hour
   });
 
   const dataMap = new Map(rawData.map(item => [item.date, item]));
