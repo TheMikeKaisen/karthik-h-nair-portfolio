@@ -46,16 +46,16 @@ async function syncDate(dateStr) {
     octokit.search.issuesAndPullRequests({ q: `author:TheMikeKaisen type:issue created:${dateStr}` }),
   ]);
 
-  const githubCount = (commits.data.total_count || 0) + 
-                     (prs.data.total_count || 0) + 
-                     (issues.data.total_count || 0);
+  const githubCount = (commits.data.total_count || 0) +
+    (prs.data.total_count || 0) +
+    (issues.data.total_count || 0);
 
   // LeetCode Logic
   const leetcodeCount = await fetchLeetCodeCount(dateStr);
 
   // Sanity Logs/Articles (Excluding drafts)
   const sanityActivity = await sanity.fetch(
-    `count(*[!(_id in drafts.**) && (_type == "article" || _type == "devLog") && _createdAt match $date])`,
+    `count(*[!( _id in path("drafts.**") ) && (_type == "article" || _type == "devLog") && _createdAt match $date])`,
     { date: `${dateStr}*` }
   );
 
