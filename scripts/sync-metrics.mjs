@@ -115,14 +115,12 @@ async function runSync() {
   const { data: user } = await octokit.users.getAuthenticated();
   console.log(`Authenticated as: ${user.login}`);
 
-  const today = new Date();
-  const yesterday = new Date();
-  yesterday.setDate(yesterday.getDate() - 1);
-
-  const dates = [
-    yesterday.toISOString().split('T')[0],
-    today.toISOString().split('T')[0]
-  ];
+  const dates = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    dates.push(d.toISOString().split('T')[0]);
+  }
 
   for (const date of dates) {
     await syncDate(date);

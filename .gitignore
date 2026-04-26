@@ -14,6 +14,16 @@
 /coverage
 /src-old
 /src-redesigned
+/venv
+.claude
+.continue
+.cursorrules
+.gemini
+.kiro
+.opencode.json
+.windsurfrules
+.mcp.json
+GEMINI.md
 
 # next.js
 /.next/
@@ -44,3 +54,5 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+# Added by code-review-graph
+.code-review-graph/
